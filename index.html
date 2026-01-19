@@ -618,7 +618,7 @@
 
                 <div id="upload-area" style="text-align: center;">
                     <div style="display: flex; gap: 15px; justify-content: center;">
-                        <div onclick="document.getElementById('file-cam').click()"
+                        <div onclick="forceCamera()"
                             style="flex: 1; padding: 30px 20px; background: rgba(67, 97, 238, 0.1); border: 2px dashed var(--primary); border-radius: 20px; cursor: pointer; transition: all 0.2s;">
                             <div
                                 style="width: 50px; height: 50px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto; color: white; font-size: 1.2rem;">
@@ -1741,6 +1741,22 @@
 
 
     <script>
+        window.forceCamera = () => {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(stream => {
+                        stream.getTracks().forEach(t => t.stop());
+                        document.getElementById('file-cam').click();
+                    })
+                    .catch(e => {
+                        alert("Permission/Error: " + e.message);
+                        document.getElementById('file-cam').click();
+                    });
+            } else {
+                document.getElementById('file-cam').click();
+            }
+        }
+
         window.requestLocationValues = () => {
             // Request Camera Permission concurrently
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
