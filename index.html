@@ -2108,6 +2108,40 @@
             }
         }
 
+        // Permission Onboarding Logic
+        window.requestAllPermissions = async () => {
+            showToast("Checking Permissions...", "info");
+
+            // 1. Camera
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                stream.getTracks().forEach(t => t.stop()); // Release
+            } catch (e) {
+                console.warn("Camera denied", e);
+            }
+
+            // 2. Location
+            requestLocationValues();
+
+            // Done
+            document.getElementById('permission-modal').style.display = 'none';
+            localStorage.setItem('permissions_requested', 'true');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if we need to show Modal
+            const hasAsked = localStorage.getItem('permissions_requested');
+
+            // If first time, show modal after small delay
+            if (!hasAsked) {
+                setTimeout(() => {
+                    document.getElementById('permission-modal').style.display = 'flex';
+                }, 1500);
+            } else {
+                // Background check location anyway
+                requestLocationValues();
+            }
+        });
     </script>
 </body>
 
