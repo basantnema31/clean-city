@@ -1026,8 +1026,8 @@
     function initMap() {
       if (map) return;
       map = L.map("admin-map", { scrollWheelZoom: false }).setView(
-        [12.9716, 77.5946],
-        12,
+        [20.5937, 78.9629],
+        5,
       );
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
@@ -1193,11 +1193,14 @@
     function getThemeColor(status) {
       if (status === "resolved") return "success";
       if (status === "progress") return "primary";
+      if (status === "rejected") return "danger";
       return "warning";
     }
     function getColorHex(status) {
       if (status === "resolved") return "#4cc9f0";
       if (status === "progress") return "#4361ee";
+      if (status === "rejected") return "#ff4d4d";
+      return "#f8961e";
       return "#f8961e";
     }
     window.switchTab = (tab) => {
