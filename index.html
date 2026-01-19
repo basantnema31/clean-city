@@ -619,6 +619,7 @@
 
         <div id="view-report" class="view-section">
             <h3 style="margin: 20px;">Report Garbage</h3>
+            <!-- ... content ... -->
             <div class="glass">
                 <input type="file" id="file-cam" accept="image/*" capture="environment" class="visually-hidden"
                     onchange="handleFileSelect(this)">
@@ -677,6 +678,39 @@
                 <button class="btn" onclick="submitComplaint()" id="submit-btn" disabled
                     style="opacity: 0.6; cursor: not-allowed; font-size: 1.1rem; padding: 15px;">
                     Take Photo to Submit
+                </button>
+            </div>
+        </div>
+
+        <!-- SHARE MODAL -->
+        <div id="share-modal"
+            style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 50000; align-items: center; justify-content: center; flex-direction: column; padding: 20px;">
+            <div
+                style="background: white; border-radius: 20px; padding: 20px; max-width: 400px; width: 100%; text-align: center;">
+                <h3 style="color: var(--primary); margin-bottom: 5px;">Great Job! 🎉</h3>
+                <p style="color: var(--text-light); margin-bottom: 15px; font-size: 0.9rem;">Clean City, Green Future.
+                </p>
+
+                <div
+                    style="background: #f0f0f0; border-radius: 10px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                    <img id="share-card-preview" src="" style="width: 100%; display: block;" />
+                </div>
+
+                <canvas id="share-canvas" width="1080" height="1920" style="display: none;"></canvas>
+
+                <button onclick="shareImage()" class="btn"
+                    style="background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); margin-bottom: 10px;">
+                    <i class="fa-brands fa-instagram"></i> Share on Socials
+                </button>
+
+                <button onclick="downloadImage()" id="download-btn" class="btn"
+                    style="background: var(--text-light); margin-bottom: 10px; display: none;">
+                    <i class="fa-solid fa-download"></i> Save Image
+                </button>
+
+                <button onclick="closeShareModal()"
+                    style="background: transparent; border: none; text-decoration: underline; color: var(--text-light);">
+                    Close
                 </button>
             </div>
         </div>
@@ -1459,6 +1493,121 @@
             resDiv.style.color = 'var(--success)';
             resDiv.dataset.val = "Manual Override (" + detected + ")";
             document.getElementById('submit-btn').disabled = false;
+        }
+
+        // SOCIAL SHARE LOGIC
+        window.generatedBlob = null;
+
+        window.openShareModal = (imageSrc, lat, lng) => {
+            const modal = document.getElementById('share-modal');
+            const preview = document.getElementById('share-card-preview');
+            const canvas = document.getElementById('share-canvas');
+            const ctx = canvas.getContext('2d');
+
+            modal.style.display = 'flex';
+
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = () => {
+                // Background
+                ctx.fillStyle = '#1a1a2e'; // Dark theme bg
+                ctx.fillRect(0, 0, 1080, 1920);
+
+                // Featured Image (Center Crop)
+                // Draw image to fill center area
+                const aspect = img.width / img.height;
+                let drawWidth, drawHeight, offsetX, offsetY;
+
+                if (aspect > 1080 / 1200) { // Wider
+                    drawHeight = 1200;
+                    drawWidth = 1200 * aspect;
+                    offsetX = (1080 - drawWidth) / 2;
+                    offsetY = 360;
+                } else { // Taller
+                    drawWidth = 1080;
+                    drawHeight = 1080 / aspect;
+                    offsetX = 0;
+                    offsetY = 360 - (drawHeight - 1200) / 2; // Center Vertically in slot
+                }
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.roundRect(40, 360, 1000, 1000, 40); // Image Container
+                ctx.clip();
+                ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+                ctx.restore();
+
+                // Branding Top
+                ctx.fillStyle = '#4facfe';
+                ctx.font = 'bold 80px Poppins';
+                ctx.textAlign = 'center';
+                ctx.fillText("CleanCity Hero", 540, 200);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '40px Inter';
+                ctx.fillText("I just reported a cleaning spot!", 540, 280);
+
+                // Bottom Info
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '60px Poppins';
+                ctx.fillText("Status: REPORTED ✅", 540, 1500);
+
+                ctx.font = '40px Inter';
+                ctx.fillStyle = '#aaaaaa';
+                const date = new Date().toLocaleDateString();
+                ctx.fillText(date + " • " + (window.currentPincode || "Rank " + (Math.floor(Math.random() * 20) + 1)), 540, 1600);
+
+                // Logo/Footer
+                ctx.fillStyle = '#4facfe';
+                ctx.font = 'bold 50px Poppins';
+                ctx.fillText("#CleanCityApp", 540, 1800);
+
+                // Export
+                const dataUrl = canvas.toDataURL('image/png');
+                preview.src = dataUrl;
+
+                canvas.toBlob(blob => {
+                    window.generatedBlob = blob;
+                }, 'image/png');
+            };
+            img.src = imageSrc;
+        }
+
+        window.shareImage = async () => {
+            if (!window.generatedBlob) return showToast("Generating image...", "error");
+
+            const file = new File([window.generatedBlob], "cleancity-share.png", { type: "image/png" });
+
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: 'CleanCity Report',
+                        text: 'I just contributed to keeping my city clean! #CleanCityApp'
+                    });
+                    showToast("Shared successfully!", "success");
+                } catch (err) {
+                    console.log("Share failed", err);
+                    // Fallback
+                    document.getElementById('download-btn').style.display = 'inline-block';
+                    showToast("Sharing failed, try downloading.", "error");
+                }
+            } else {
+                document.getElementById('download-btn').style.display = 'inline-block';
+                showToast("Native sharing not supported, please download.", "info");
+            }
+        }
+
+        window.downloadImage = () => {
+            const preview = document.getElementById('share-card-preview');
+            const a = document.createElement('a');
+            a.href = preview.src;
+            a.download = 'cleancity-hero.png';
+            a.click();
+        }
+
+        window.closeShareModal = () => {
+            document.getElementById('share-modal').style.display = 'none';
         }
 
         window.submitComplaint = async () => {
