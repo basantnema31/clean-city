@@ -1683,13 +1683,10 @@
                         showToast("Link Gen Failed. Try Screenshot.", "error");
                     }
                 })
-        } else {
-            showToast("Link Gen Failed. Try Screenshot.", "error");
-        }
-                })
-                .catch (e => {
-            showToast("Error escaping WebView: " + e.message, "error");
-        });
+
+                .catch(e => {
+                    showToast("Error escaping WebView: " + e.message, "error");
+                });
         }
 
         window.closeShareModal = () => {
