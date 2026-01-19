@@ -371,6 +371,28 @@
             max-width: 400px;
         }
 
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 50px;
+            padding: 16px;
+            position: fixed;
+            z-index: 100000;
+            /* Increased to be above modal */
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+        }
+
         .toast {
             background: rgba(40, 44, 52, 0.95);
             color: white;
@@ -1614,16 +1636,37 @@
         window.downloadImage = () => {
             if (!window.generatedBlob) return;
 
-            // Use Blob URL for better Android compatibility
-            const url = URL.createObjectURL(window.generatedBlob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'CleanCity_Hero.png';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            showToast("Preparing download link...", "info");
 
-            setTimeout(() => URL.revokeObjectURL(url), 100);
+            const formData = new FormData();
+            formData.append("image", window.generatedBlob, "CleanCity_Share.png");
+
+            fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                method: "POST",
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const url = data.data.url;
+                        // Use window.location.href to force navigation if open fails
+                        // But try simple link first
+                        const a = document.createElement('a');
+                        a.href = url;
+                        // a.target = "_blank"; // WebViews sometimes block _blank
+                        a.download = "CleanCity_Hero.png"; // Hint
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+
+                        showToast("Image Opened! Long-press to save.", "success");
+                    } else {
+                        showToast("Link Gen Failed. Try Screenshot.", "error");
+                    }
+                })
+                .catch(e => {
+                    showToast("Error escaping WebView: " + e.message, "error");
+                });
         }
 
         window.closeShareModal = () => {
