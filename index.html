@@ -1,0 +1,1737 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CleanCity Premium</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+
+
+    <link rel="icon" href="logo.png" type="image/png">
+    <link rel="manifest" href="manifest.json">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <style>
+        :root {
+            --primary: #4facfe;
+            --secondary: #00f2fe;
+            --accent: #a18cd1;
+            --success: #66bb6a;
+            --danger: #ff6b6b;
+            --bg-body: #f8f9fa;
+            --text-main: #333333;
+            --text-light: #888888;
+
+            --glass-bg: #ffffff;
+            --glass-border: transparent;
+            --shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+
+            --gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning: #fbc2eb;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #1a1a2e;
+            --text-main: #e2e2e2;
+            --text-light: #a0a0a0;
+            --glass-bg: #16213e;
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.3);
+            --gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            background-image: none;
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            padding-bottom: 100px;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5 {
+            font-family: 'Poppins', sans-serif;
+            letter-spacing: -0.5px;
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(0px);
+            -webkit-backdrop-filter: blur(0px);
+            border: none;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: 24px;
+            margin: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .glass:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 45px -10px rgba(0, 0, 0, 0.12);
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+            width: 100%;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .delete-btn {
+            background: #ffe5e5;
+            color: #d32f2f;
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(211, 47, 47, 0.15);
+            transition: transform 0.2s, background 0.2s;
+            margin-left: 5px;
+            font-size: 0.9rem;
+        }
+
+        .delete-btn:hover {
+            background: #ffcdd2;
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        #auth-container {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: var(--bg-body);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 400px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(20px);
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 16px;
+            margin: 10px 0;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.5);
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        [data-theme="dark"] .auth-input {
+            background: rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .auth-input:focus {
+            border-color: var(--primary);
+            background: transparent;
+        }
+
+        #app-container {
+            display: none;
+        }
+
+        #app-header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+
+
+        .bottom-nav {
+            background: #ffffff;
+            border-radius: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            height: 70px;
+            padding: 0 20px;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 98;
+            border: none;
+        }
+
+        [data-theme="dark"] .bottom-nav {
+            background: #1e293b;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        body.is-profile-view .bottom-nav {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            body.is-profile-view .bottom-nav {
+                display: flex !important;
+            }
+        }
+
+        .nav-item {
+            color: var(--text-light);
+            text-align: center;
+            font-size: 0.75rem;
+            transition: color 0.3s;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .nav-item i {
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+            display: block;
+            transition: transform 0.2s;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item:hover i,
+        .nav-item.active i {
+            transform: translateY(-2px);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        [data-theme="dark"] .leaflet-layer {
+            filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+        }
+
+        .view-section {
+            display: none;
+            padding-bottom: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        .leaflet-pane img {
+            max-width: none !important;
+            height: auto !important;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status-pending {
+            background: #fff3cd !important;
+            color: #856404 !important;
+            border-left: 5px solid #ffecb5 !important;
+        }
+
+        .status-resolved {
+            background: #d4edda !important;
+            color: #155724 !important;
+            border-left: 5px solid #c3e6cb !important;
+        }
+
+        .status-rejected {
+            background: #f8d7da !important;
+            color: #721c24 !important;
+            border-left: 5px solid #f5c6cb !important;
+        }
+
+        .status-progress {
+            background: #cce5ff !important;
+            color: #004085 !important;
+            border-left: 5px solid #b8daff !important;
+        }
+
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .toast {
+            background: rgba(40, 44, 52, 0.95);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            font-size: 0.95rem;
+            animation: slideDown 0.3s ease forwards;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: auto;
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--primary);
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+        }
+    </style>
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.body?.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+</head>
+
+<body>
+    <div id="toast-container"></div>
+
+    <div id="app-header"
+        style="display: none; padding: 50px 20px 20px 20px; justify-content: space-between; align-items: center;">
+        <div>
+            <h2 style="color: var(--primary); margin-bottom: 0; display: flex; align-items: center; gap: 8px;">
+                <img src="logo.png" alt="Logo" style="width: 30px; height: 30px;">
+                CleanCity
+            </h2>
+            <small style="color: var(--text-light);" id="user-display">Welcome Back</small>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div class="theme-toggle" onclick="toggleTheme()">
+                <i class="fa-solid fa-moon" id="theme-icon"></i>
+            </div>
+            <div onclick="switchView('profile')"
+                style="width: 40px; height: 40px; border-radius: 50%; background: var(--gradient); display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; box-shadow: var(--shadow);">
+                <i class="fa-solid fa-user"></i>
+            </div>
+        </div>
+    </div>
+
+    <div id="auth-container"
+        style="position: fixed; inset: 0; z-index: 1000; background: var(--bg-body); display: none; justify-content: center; align-items: center; padding: 20px;">
+
+        <div class="theme-toggle" onclick="toggleTheme()" style="position: absolute; top: 20px; right: 20px;">
+            <i class="fa-solid fa-moon" id="auth-theme-icon"></i>
+        </div>
+
+        <div id="login-card" class="auth-card">
+            <h2 style="margin-bottom: 10px; color: var(--primary);">Welcome Back</h2>
+            <p style="color: var(--text-light); margin-bottom: 30px;">Sign in to help keep your city clean.</p>
+
+            <form onsubmit="event.preventDefault(); handleLogin();">
+                <input type="email" id="login-email" placeholder="Email Address" class="auth-input" required />
+                <input type="password" id="login-pass" placeholder="Password" class="auth-input" required />
+                <button class="btn" style="margin-top: 20px;">Sign In <i class="fa-solid fa-arrow-right"></i></button>
+            </form>
+
+            <p style="margin-top: 20px; font-size: 0.9rem; color: var(--text-light);">
+                New here? <span onclick="toggleAuthMode()"
+                    style="color: var(--primary); cursor: pointer; font-weight: 600;">Create Account</span>
+            </p>
+        </div>
+
+        <div id="register-card" class="auth-card" style="display: none;">
+            <h2 style="margin-bottom: 10px; color: var(--accent);">Join the Movement</h2>
+            <p style="color: var(--text-light); margin-bottom: 30px;">Create an account to start reporting and earn
+                points!</p>
+
+            <form onsubmit="event.preventDefault(); handleSignup();">
+                <input type="text" id="reg-name" placeholder="Full Name" class="auth-input" required />
+                <input type="email" id="reg-email" placeholder="Email Address" class="auth-input" required />
+                <input type="password" id="reg-pass" placeholder="Create Password" class="auth-input" required />
+                <button class="btn" style="background: var(--accent); margin-top: 20px;">Create Account</button>
+            </form>
+
+            <p style="margin-top: 20px; font-size: 0.9rem; color: var(--text-light);">
+                Already a member? <span onclick="toggleAuthMode()"
+                    style="color: var(--primary); cursor: pointer; font-weight: 600;">Sign In</span>
+            </p>
+        </div>
+    </div>
+    </div>
+
+    <div id="camera-modal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 20000; flex-direction: column;">
+        <div
+            style="padding: 50px 20px 20px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5);">
+            <button onclick="switchLens()" style="background: none; border: none; color: white; font-size: 1.5rem;"
+                title="Switch Camera"><i class="fa-solid fa-camera-rotate"></i></button>
+            <h3 style="color: white; margin: 0;">Take Photo</h3>
+            <button onclick="closeCamera()" style="background: none; border: none; color: white; font-size: 1.5rem;"><i
+                    class="fa-solid fa-times"></i></button>
+        </div>
+        <div
+            style="flex: 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000;">
+            <video id="camera-stream" autoplay playsinline muted
+                style="width: 100%; height: 100%; object-fit: cover;"></video>
+            <canvas id="camera-canvas" style="display: none;"></canvas>
+
+
+            <div
+                style="position: absolute; bottom: 20px; display: flex; gap: 10px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 20px;">
+                <button id="mode-photo" onclick="switchCameraMode('photo')"
+                    style="background: white; color: black; border:none; padding: 5px 15px; border-radius: 15px; font-weight: bold; font-size: 0.8rem;">Photo</button>
+                <button id="mode-video" onclick="switchCameraMode('video')"
+                    style="background: transparent; color: white; border:none; padding: 5px 15px; border-radius: 15px; font-weight: bold; font-size: 0.8rem;">Video</button>
+            </div>
+
+            <div id="recording-indicator"
+                style="display: none; position: absolute; top: 20px; right: 20px; background: red; color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; animation: pulse 1s infinite;">
+                REC</div>
+        </div>
+        <div
+            style="padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); gap: 20px;">
+
+            <div style="width: 80%; display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-minus" style="color: white; font-size: 0.8rem;"></i>
+                <input type="range" id="zoom-slider" min="1" max="3" step="0.1" value="1"
+                    style="flex: 1; accent-color: var(--primary);" oninput="handleZoom(this.value)">
+                <i class="fa-solid fa-plus" style="color: white; font-size: 0.8rem;"></i>
+            </div>
+
+            <button id="capture-btn" onclick="handleCaptureClick()"
+                style="width: 70px; height: 70px; border-radius: 50%; background: white; border: 5px solid rgba(255,255,255,0.3); outline: 2px solid white; cursor: pointer; transition: all 0.2s;"></button>
+        </div>
+    </div>
+
+    <div id="permission-modal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 30000; align-items: center; justify-content: center; flex-direction: column; padding: 20px; text-align: center;">
+        <div
+            style="background: var(--glass-bg); padding: 30px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); max-width: 90%;">
+            <div
+                style="width: 60px; height: 60px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; box-shadow: 0 0 20px var(--primary);">
+                <i class="fa-solid fa-shield-halved" style="font-size: 1.5rem; color: white;"></i>
+            </div>
+            <h3 style="color: white; margin-bottom: 10px;">Setup Permissions</h3>
+            <p style="color: var(--text-light); margin-bottom: 25px; font-size: 0.95rem;">
+                To report waste correctly, CleanCity needs access to your <b>Camera</b> (for photos/videos) and
+                <b>Location</b> (for mapping).
+            </p>
+            <button onclick="requestAllPermissions()" class="btn btn-glow"
+                style="width: 100%; font-size: 1.1rem; padding: 15px;">
+                <i class="fa-solid fa-check"></i> Allow Access
+            </button>
+            <button onclick="document.getElementById('permission-modal').style.display='none'"
+                style="background: transparent; border: none; color: var(--text-light); margin-top: 15px; font-size: 0.9rem; text-decoration: underline;">
+                Skip for Now
+            </button>
+        </div>
+    </div>
+
+    <div id="app-container">
+
+        <div id="view-home" class="view-section active">
+            <div class="glass" style="background: var(--gradient); color: white; border: none;">
+                <h3>Your Impact</h3>
+                <div style="display: flex; gap: 20px; margin-top: 10px;">
+                    <div>
+                        <span style="font-size: 2.2rem; font-weight: 800;" id="user-points">0</span>
+                        <div style="font-size: 0.8rem; opacity: 0.9;">Points Earned</div>
+                    </div>
+                    <div>
+                        <span style="font-size: 2.2rem; font-weight: 800;" id="user-reports">0</span>
+                        <div style="font-size: 0.8rem; opacity: 0.9;">Reports Resolved</div>
+                    </div>
+                    <div>
+                        <span style="font-size: 2.2rem; font-weight: 800; color: white;" id="user-pending">0</span>
+                        <div style="font-size: 0.8rem; opacity: 0.9;">Pending Review</div>
+                    </div>
+                </div>
+            </div>
+
+            <h4 style="margin: 20px;">Recent Activity</h4>
+            <div id="activity-list" style="padding-bottom: 20px;">
+                <div class="glass" style="text-align: center; color: var(--text-light); padding: 40px;">
+                    <i class="fa-solid fa-seedling" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
+                    <p>No activity yet. Start by reporting waste!</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-map" class="view-section">
+            <h3 style="margin: 20px;">Waste Hotspots</h3>
+            <div class="glass" style="padding: 0; overflow: hidden; height: 450px; margin-bottom: 30px;">
+                <div id="user-map" style="height: 100%; width: 100%;"></div>
+            </div>
+        </div>
+
+        <div id="view-leaderboard" class="view-section">
+            <h3 style="margin: 20px;">City Heroes</h3>
+            <div id="leaderboard-list">
+                <!-- Dynamic Content -->
+            </div>
+        </div>
+
+        <div id="view-report" class="view-section">
+            <h3 style="margin: 20px;">Report Garbage</h3>
+            <div class="glass">
+                <input type="file" id="file-cam" accept="image/*" capture="environment" style="display: none;"
+                    onchange="handleFileSelect(this)">
+
+                <input type="file" id="file-gallery" accept="image/*,video/*" style="display: none;"
+                    onchange="handleFileSelect(this)">
+
+                <div id="upload-area" style="text-align: center;">
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        <div onclick="startCamera()"
+                            style="flex: 1; padding: 30px 20px; background: rgba(67, 97, 238, 0.1); border: 2px dashed var(--primary); border-radius: 20px; cursor: pointer; transition: all 0.2s;">
+                            <div
+                                style="width: 50px; height: 50px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto; color: white; font-size: 1.2rem;">
+                                <i class="fa-solid fa-camera"></i>
+                            </div>
+                            <span style="font-weight: 600; color: var(--primary);">Take Photo</span>
+                        </div>
+
+                        <div onclick="document.getElementById('file-gallery').click()"
+                            style="flex: 1; padding: 30px 20px; background: rgba(67, 97, 238, 0.05); border: 2px dashed var(--primary); border-radius: 20px; cursor: pointer; transition: all 0.2s;">
+                            <div
+                                style="width: 50px; height: 50px; background: var(--text-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto; color: white; font-size: 1.2rem;">
+                                <i class="fa-solid fa-images"></i>
+                            </div>
+                            <span style="font-weight: 600; color: var(--text-light);">Gallery</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.03); border-radius: 12px; padding: 15px; display: none; align-items: center; gap: 20px;"
+                    id="preview-container">
+                    <img id="image-preview" src=""
+                        style="width: 100px; height: 100px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: block;">
+
+                    <button id="remove-img-btn" class="btn"
+                        style="background: var(--danger); font-size: 0.9rem; padding: 8px 16px; width: auto; box-shadow: none;"
+                        onclick="removeImage()">
+                        <i class="fa-solid fa-trash"></i> Remove
+                    </button>
+                </div>
+
+                <div id="ai-result"
+                    style="display: none; background: rgba(67, 97, 238, 0.1); padding: 20px; border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--primary);">
+                    <small
+                        style="text-transform: uppercase; letter-spacing: 1px; font-size: 0.7rem; color: var(--primary); font-weight: 700;">AI
+                        Analysis</small>
+                    <div id="final-res" style="font-size: 1.1rem; margin-top: 5px;">Waiting...</div>
+                </div>
+
+                <div
+                    style="margin-bottom: 20px; font-size: 0.9rem; color: var(--text-light); display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-location-dot" style="color: var(--primary);"></i>
+                    <span id="loc-status">Waiting for GPS...</span>
+                </div>
+
+                <button class="btn" onclick="submitComplaint()" id="submit-btn" disabled
+                    style="opacity: 0.6; cursor: not-allowed; font-size: 1.1rem; padding: 15px;">
+                    Take Photo to Submit
+                </button>
+            </div>
+        </div>
+
+        <div id="view-profile" class="view-section" style="display: none; padding-top: 30px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin: 20px;">
+                <button class="btn"
+                    style="width: 40px; height: 40px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center;"
+                    onclick="switchView('home')">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <h3>My Profile</h3>
+            </div>
+
+            <div class="glass" style="text-align: center; padding-top: 40px; position: relative; overflow: hidden;">
+                <div
+                    style="width: 150px; height: 150px; background: rgba(0,0,0,0.03); border-radius: 50%; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow);">
+                    <i class="fa-solid fa-user" style="font-size: 4rem; color: var(--primary); opacity: 0.5;"></i>
+                </div>
+
+                <h2 id="profile-name-display" style="margin-bottom: 5px;">User</h2>
+                <span id="profile-email-display"
+                    style="color: var(--text-light); font-size: 0.9rem;">user@example.com</span>
+
+                <div
+                    style="display: flex; justify-content: space-around; margin-top: 30px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
+                    <div>
+                        <h2 id="profile-points" style="color: var(--primary);">0</h2>
+                        <small style="text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px;">Points</small>
+                    </div>
+                    <div>
+                        <h2 id="profile-rank" style="color: var(--accent);">Rookie</h2>
+                        <small style="text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px;">Rank</small>
+                    </div>
+                </div>
+            </div>
+
+            <h4 style="margin: 0 20px 10px 20px;">Settings</h4>
+            <div class="glass">
+                <label style="font-size: 0.9rem; margin-bottom: 5px; display: block;">Display Name</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="profile-name-input" class="auth-input" placeholder="Enter your name"
+                        style="margin: 0;">
+                    <button class="btn" onclick="updateProfileName()" style="width: auto;">Save</button>
+                </div>
+            </div>
+
+            <div style="padding: 20px;">
+                <button class="btn" onclick="logout()"
+                    style="background: var(--danger); box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchView('home', this)">
+                <i class="fa-solid fa-house"></i> <span>Home</span>
+            </div>
+            <div class="nav-item" onclick="switchView('map', this)">
+                <i class="fa-solid fa-map"></i> <span>Map</span>
+            </div>
+
+            <div class="nav-item" onclick="switchView('report', this)">
+                <i class="fa-solid fa-plus-circle"></i> <span>Report</span>
+            </div>
+
+            <div class="nav-item" onclick="switchView('leaderboard', this)">
+                <i class="fa-solid fa-trophy"></i> <span>Rank</span>
+            </div>
+            <div class="nav-item" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
+            </div>
+        </div>
+
+    </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@1.0.0"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, set, onValue, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+
+
+
+
+        window.onerror = function (message, source, lineno, colno, error) {
+            console.error(message, lineno);
+            if (window.showToast) {
+                showToast("Error: " + message, "error");
+            }
+        };
+
+
+
+        window.switchView = (viewName, navEl = null) => {
+            try {
+                document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
+                const target = document.getElementById(`view-${viewName}`);
+                if (target) {
+                    target.style.display = 'block';
+                } else {
+                    console.error("View not found:", viewName);
+                    return;
+                }
+
+                if (viewName === 'profile') {
+                    document.body.classList.add('is-profile-view');
+                } else {
+                    document.body.classList.remove('is-profile-view');
+                }
+
+                if (navEl) {
+                    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                    navEl.classList.add('active');
+                }
+
+                if (viewName === 'profile') {
+                    const fab = document.querySelector('.fab');
+                    if (fab) fab.style.display = 'none';
+                    try {
+                        populateProfileView();
+                    } catch (e) {
+                        console.error("Profile population error:", e);
+                    }
+                } else {
+                    const fab = document.querySelector('.fab');
+                    if (fab) fab.style.display = 'flex';
+                }
+
+                if (viewName === 'map') {
+                    setTimeout(() => {
+                        if (map) {
+                            map.invalidateSize();
+                            if (currentLat && currentLng) {
+                                map.setView([currentLat, currentLng], 15);
+                            }
+                        }
+                    }, 200);
+                }
+
+                if (viewName === 'report') {
+                    if (currentLat && currentLng) {
+                        const locStat = document.getElementById('loc-status');
+                        if (locStat) locStat.innerHTML = `<span style="color:green"><i class="fa-solid fa-check"></i> Location Auto-Detected</span>`;
+                    } else {
+                        const locStat = document.getElementById('loc-status');
+                        if (locStat) {
+                            locStat.innerHTML = `
+                                <span style="color:var(--text-light)"><i class="fa-solid fa-location-dot"></i> Detecting Location...</span>
+                                <button onclick="requestLocationValues()" class="btn" style="margin-left:10px; padding: 5px 10px; font-size: 0.8rem; width: auto; background: var(--primary);">
+                                    <i class="fa-solid fa-location-crosshairs"></i> Enable GPS
+                                </button>
+                             `;
+                        }
+                        requestLocationValues();
+                    }
+                }
+
+            } catch (err) {
+                alert("Nav Error: " + err.message);
+            }
+        };
+
+        function populateProfileView() {
+            if (typeof currentUserData === 'undefined' || !currentUserData) return;
+
+            document.getElementById('profile-name-display').innerText = currentUserData.name || 'Citizen';
+            document.getElementById('profile-email-display').innerText = currentUserData.email || '';
+            document.getElementById('profile-points').innerText = currentUserData.points || 0;
+            document.getElementById('profile-name-input').value = currentUserData.name || '';
+
+            const p = currentUserData.points || 0;
+            let rank = "Rookie";
+            if (p > 50) rank = "Scout";
+            if (p > 100) rank = "Ranger";
+            if (p > 500) rank = "Captain";
+            if (p > 1000) rank = "Hero";
+            document.getElementById('profile-rank').innerText = rank;
+        }
+
+        window.updateProfileName = () => {
+            const newName = document.getElementById('profile-name-input').value;
+            if (!newName) return showToast("Please enter a name", "error");
+
+            if (typeof currentUserUid !== 'undefined' && currentUserUid) {
+                set(ref(db, `users/${currentUserUid}/name`), newName)
+                    .then(() => {
+                        showToast("Name Updated Successfully!", "success");
+
+                        // Sync UI
+                        document.getElementById('profile-name-display').innerText = newName;
+                        if (document.getElementById('user-display')) document.getElementById('user-display').innerText = `Hi, ${newName}`;
+
+                        // Sync LocalStorage
+                        let user = JSON.parse(localStorage.getItem('user') || '{}');
+                        user.name = newName;
+                        localStorage.setItem('user', JSON.stringify(user));
+
+                        // Refresh Leaderboard
+                        loadLeaderboard();
+                    })
+                    .catch(e => showToast(e.message, "error"));
+            } else {
+                showToast("Error: User not authenticated properly.", "error");
+            }
+        }
+
+        window.showToast = (message, type = 'info') => {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+
+            let icon = 'fa-info-circle';
+            if (type === 'success') icon = 'fa-check-circle';
+            if (type === 'error') icon = 'fa-exclamation-triangle';
+
+            toast.innerHTML = `
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <i class="fa-solid ${icon}" style="color:${type === 'success' ? 'var(--success)' : (type === 'error' ? 'var(--danger)' : 'var(--primary)')}"></i>
+                    <span>${message}</span>
+                </div>
+                <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        };
+        window.showReportView = () => switchView('report');
+
+
+
+        let currentImageFile = null;
+        let currentLat = null;
+        let currentLng = null;
+        let map = null;
+        let currentUserData = null;
+        let currentUserUid = null;
+
+
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4OeHd1iqPFSS2OtyWNy6DXgGhNmMbk54",
+            authDomain: "web-app-8edcb.firebaseapp.com",
+            databaseURL: "https://web-app-8edcb-default-rtdb.firebaseio.com",
+            projectId: "web-app-8edcb",
+            storageBucket: "web-app-8edcb.firebasestorage.app",
+            messagingSenderId: "23560015388",
+            appId: "1:23560015388:web:39bc4d9ca858975f62d9d9"
+        };
+        const IMGBB_API_KEY = "eef75a5e0bc4f6786b78d13a0bdeabf9";
+
+        let app, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getDatabase(app);
+        } catch (e) { console.error(e); }
+
+
+
+
+
+        window.toggleTheme = () => {
+            const html = document.documentElement;
+            const mainIcon = document.getElementById('theme-icon');
+            const authIcon = document.getElementById('auth-theme-icon');
+
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.removeAttribute('data-theme');
+                document.body.removeAttribute('data-theme');
+                if (mainIcon) mainIcon.classList.replace('fa-sun', 'fa-moon');
+                if (authIcon) authIcon.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                if (mainIcon) mainIcon.classList.replace('fa-moon', 'fa-sun');
+                if (authIcon) authIcon.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.getElementById('theme-icon')?.classList.replace('fa-moon', 'fa-sun');
+            document.getElementById('auth-theme-icon')?.classList.replace('fa-moon', 'fa-sun');
+        }
+
+        window.toggleAuthMode = () => {
+            const login = document.getElementById('login-card');
+            const reg = document.getElementById('register-card');
+
+            if (login.style.display === 'none') {
+                login.style.display = 'block';
+                reg.style.display = 'none';
+            } else {
+                login.style.display = 'none';
+                reg.style.display = 'block';
+            }
+        }
+
+        window.handleLogin = () => {
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-pass').value;
+            if (!email || !pass) {
+                showToast("Please enter both email and password.", "error");
+                return;
+            }
+
+            const btn = document.querySelector('#login-card .btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking...';
+            btn.disabled = true;
+
+            try {
+                const userId = email.replace(/\./g, '_');
+                const userRef = ref(db, 'users/' + userId);
+
+                onValue(userRef, (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        if (data.password === pass) {
+                            loginSuccess(data);
+                        } else {
+                            showToast("Incorrect Password!", "error");
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        }
+                    } else {
+                        showToast("User not found! Please create an account first.", "error");
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }
+                }, { onlyOnce: true });
+            } catch (error) {
+                console.error(error);
+                showToast("Login Error: " + error.message, "error");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        };
+
+        window.handleSignup = () => {
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const pass = document.getElementById('reg-pass').value;
+
+            if (!name || !email || !pass) {
+                showToast("Please fill in all fields.", "error");
+                return;
+            }
+
+            const btn = document.querySelector('#register-card .btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
+            btn.disabled = true;
+
+            try {
+                if (!db) {
+                    alert("System Error: Database not connected. Please reload.");
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    return;
+                }
+
+                const userId = email.replace(/\./g, '_');
+                const userRef = ref(db, 'users/' + userId);
+
+                const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 10000));
+
+                Promise.race([get(userRef), timeout]).then((snapshot) => {
+                    if (snapshot.exists()) {
+                        showToast("Account already exists! Please Sign In.", "error");
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    } else {
+                        const newUser = { name: name, email: email, password: pass, points: 0, reports: 0 };
+                        set(userRef, newUser).then(() => {
+                            showToast("Account Created! Success.", "success");
+                            loginSuccess(newUser);
+                        }).catch(err => {
+                            console.error(err);
+                            showToast("Error creating account: " + err.message, "error");
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        });
+                    }
+                }).catch(err => {
+                    console.error("Database check failed", err);
+                    showToast("Connection Error: " + err.message, "error");
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
+            } catch (error) {
+                console.error(error);
+                showToast("Signup Error: " + error.message, "error");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        };
+
+        function loginSuccess(user) {
+            localStorage.setItem('user', JSON.stringify(user));
+            currentUserUid = user.email.replace(/\./g, '_');
+
+            document.getElementById('auth-container').style.display = 'none';
+            document.getElementById('app-container').style.display = 'block';
+            document.getElementById('app-header').style.display = 'flex';
+            document.getElementById('user-display').innerText = `Hi, ${user.name}`;
+
+            initMap();
+            loadUserData(user.email);
+            loadLeaderboard();
+        }
+
+        window.logout = () => {
+            if (confirm("Are you sure you want to logout?")) {
+                localStorage.removeItem('user');
+                localStorage.removeItem('userAuth');
+                location.reload();
+            }
+        }
+
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) {
+            loginSuccess(JSON.parse(savedUser));
+        } else {
+            document.getElementById('auth-container').style.display = 'flex';
+        }
+
+        window.showReportView = () => switchView('report');
+
+        let aiModel = null;
+        (async function () {
+            try {
+                console.log("Loading AI...");
+                aiModel = await mobilenet.load();
+                console.log("AI Ready");
+            } catch (e) {
+                console.error("AI Load Failed", e);
+            }
+        })();
+
+        window.removeImage = () => {
+            currentImageFile = null;
+            if (document.getElementById('file-cam')) document.getElementById('file-cam').value = "";
+            if (document.getElementById('file-gallery')) document.getElementById('file-gallery').value = "";
+
+            document.getElementById('preview-container').style.display = 'none';
+            document.getElementById('image-preview').src = "";
+            document.getElementById('upload-area').style.display = 'block';
+            document.getElementById('ai-result').style.display = 'none';
+        }
+
+        window.processImageFile = (file) => {
+            if (!file) return;
+            currentImageFile = file;
+            const container = document.getElementById('preview-container');
+            const img = document.getElementById('image-preview');
+            const uploadArea = document.getElementById('upload-area');
+            const aiRes = document.getElementById('ai-result');
+
+            uploadArea.style.display = 'none';
+            aiRes.style.display = 'none';
+            container.style.display = 'flex';
+
+
+            if (file.type.startsWith('video/')) {
+
+                const videoUrl = URL.createObjectURL(file);
+
+
+                const tempVideo = document.createElement('video');
+                tempVideo.src = videoUrl;
+                tempVideo.muted = true;
+                tempVideo.playsInline = true;
+                tempVideo.currentTime = 1;
+
+                tempVideo.onloadeddata = () => {
+                };
+
+                tempVideo.onseeked = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = tempVideo.videoWidth;
+                    canvas.height = tempVideo.videoHeight;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(tempVideo, 0, 0, canvas.width, canvas.height);
+
+                    img.src = canvas.toDataURL('image/jpeg');
+
+                    canvas.toBlob(blob => {
+                        const thumbFile = new File([blob], "video_thumb.jpg", { type: "image/jpeg" });
+                        currentImageFile = thumbFile;
+
+                        runAIAnalysis(img);
+
+                        showToast("Video selected! Using frame for analysis.", "info");
+                    }, 'image/jpeg', 0.9);
+                };
+
+                tempVideo.preload = 'metadata';
+                setTimeout(() => { tempVideo.currentTime = 0.5; }, 200);
+
+            } else {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    img.src = e.target.result;
+                    runAIAnalysis(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.runAIAnalysis = (imgElement) => {
+
+            const aiRes = document.getElementById('ai-result');
+            if (aiModel) {
+                aiRes.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing...';
+                aiRes.style.display = 'block';
+
+                setTimeout(async () => {
+                    try {
+                        const predictions = await aiModel.classify(imgElement);
+
+                        const wasteKeywords = [
+                            'bottle', 'can', 'plastic', 'paper', 'trash', 'waste', 'garbage', 'rubbish',
+                            'carton', 'cup', 'glass', 'metal', 'bag', 'box', 'tissue', 'wrapper',
+                            'container', 'bin', 'street', 'ashcan', 'junk', 'litter', 'debris', 'packet',
+                            'bucket', 'barrel', 'basket', 'crate', 'tub', 'pot', 'vessel', 'urn',
+                            'puzzle', 'jigsaw', 'rock', 'stone', 'mountain', 'hill', 'sack', 'textile',
+                            'foam', 'styrofoam', 'cup', 'mug', 'coffee', 'espresso', 'cappuccino', 'latte',
+                            'straw', 'lid', 'disposable', 'takeout', 'leftover', 'food', 'plate', 'dish', 'tray',
+                            'cardboard', 'packaging', 'mail', 'envelope', 'courier', 'parcel',
+                            'sidewalk', 'pavement'
+                        ];
+
+                        const topN = predictions.slice(0, 5);
+
+                        const subBtn = document.getElementById('submit-btn');
+                        subBtn.disabled = false;
+                        subBtn.style.opacity = "1";
+                        subBtn.style.cursor = "pointer";
+                        subBtn.classList.add('btn-glow');
+                        subBtn.innerHTML = "SUBMIT REPORT <i class='fa-solid fa-paper-plane'></i>";
+
+                        const isWaste = topN.some(p =>
+                            wasteKeywords.some(k => new RegExp(`\\b${k}\\b`, 'i').test(p.className))
+                        );
+
+                        const topName = topN[0].className.split(',')[0];
+
+                        aiRes.innerHTML = `<small>Detected:</small> <div id="final-res" style="font-weight:bold; font-size:1.1rem; margin-top:5px;"></div>`;
+                        const resDiv = document.getElementById('final-res');
+
+                        if (isWaste) {
+                            const match = topN.find(p => wasteKeywords.some(k => p.className.toLowerCase().includes(k)));
+                            const displayName = match ? match.className.split(',')[0] : topName;
+
+                            resDiv.innerText = `âœ… ${displayName}`;
+                            resDiv.style.color = 'var(--success)';
+                            resDiv.dataset.val = displayName;
+                            document.getElementById('submit-btn').disabled = false;
+                        } else {
+                            resDiv.innerHTML = `
+                                    âš ï¸ <b>Not Garbage</b><br>
+                                    <small style="color: #666;">(AI saw: ${topName})</small>
+                                    <br>
+                                    <button class="btn btn-outline" style="margin-top: 10px; width: 100%; border: 1px solid var(--primary); color: var(--primary); background: transparent;" onclick="forceSubmit('${topName}')">
+                                        Mistake? Report Anyway
+                                    </button>
+                                `;
+                            resDiv.style.color = 'orange';
+                            resDiv.dataset.val = 'Unknown Object';
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        aiRes.innerText = "AI Error: " + err.message;
+                    }
+                }, 500);
+            }
+        }
+
+        window.handleFileSelect = (input) => {
+            if (input.files && input.files[0]) {
+                processImageFile(input.files[0]);
+            }
+        }
+
+        let cameraStream = null;
+        let videoDevices = [];
+        let currentDeviceIdx = 0;
+
+        async function initCameras() {
+            try {
+                await navigator.mediaDevices.getUserMedia({ video: true });
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                videoDevices = devices.filter(d => d.kind === 'videoinput');
+
+                const backCameras = videoDevices.filter(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('rear') || d.label.toLowerCase().includes('environment'));
+                if (backCameras.length > 0) {
+                    videoDevices = backCameras;
+                    currentDeviceIdx = videoDevices.length - 1;
+                }
+            } catch (e) {
+                console.warn("Camera enumeration failed", e);
+            }
+        }
+
+        window.startCamera = async () => {
+            const modal = document.getElementById('camera-modal');
+            const video = document.getElementById('camera-stream');
+
+            if (videoDevices.length === 0) await initCameras();
+
+            const deviceId = videoDevices[currentDeviceIdx] ? { exact: videoDevices[currentDeviceIdx].deviceId } : undefined;
+
+            const constraints = {
+                video: {
+                    deviceId: deviceId,
+                    facingMode: deviceId ? undefined : 'environment',
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                }
+            };
+
+            try {
+                if (cameraStream) {
+                    cameraStream.getTracks().forEach(t => t.stop());
+                }
+                cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = cameraStream;
+                modal.style.display = 'flex';
+            } catch (err) {
+                console.error("Camera Access Error:", err);
+                try {
+                    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                    video.srcObject = cameraStream;
+                    modal.style.display = 'flex';
+                } catch (err2) {
+                    showToast("Camera access failed. Using File Picker.", "error");
+                    document.getElementById('file-cam').click();
+                }
+            }
+        };
+
+        window.switchLens = () => {
+            if (videoDevices.length < 2) {
+                showToast("No other cameras found.", "info");
+                return;
+            }
+            currentDeviceIdx = (currentDeviceIdx + 1) % videoDevices.length;
+            startCamera();
+        }
+
+        window.closeCamera = () => {
+            const modal = document.getElementById('camera-modal');
+            modal.style.display = 'none';
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+        };
+
+        let isVideoMode = false;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let isRecording = false;
+
+        window.switchCameraMode = (mode) => {
+            isVideoMode = (mode === 'video');
+            const photoBtn = document.getElementById('mode-photo');
+            const videoBtn = document.getElementById('mode-video');
+            const capBtn = document.getElementById('capture-btn');
+
+            if (isVideoMode) {
+                photoBtn.style.background = 'transparent'; photoBtn.style.color = 'white';
+                videoBtn.style.background = 'white'; videoBtn.style.color = 'black';
+                capBtn.style.background = '#ff4d4d';
+            } else {
+                photoBtn.style.background = 'white'; photoBtn.style.color = 'black';
+                videoBtn.style.background = 'transparent'; videoBtn.style.color = 'white';
+                capBtn.style.background = 'white';
+                capBtn.style.borderRadius = '50%';
+            }
+        };
+
+        window.handleCaptureClick = () => {
+            if (isVideoMode) {
+                toggleRecording();
+            } else {
+                capturePhoto();
+            }
+        };
+
+        window.toggleRecording = () => {
+            const btn = document.getElementById('capture-btn');
+            const ind = document.getElementById('recording-indicator');
+
+            if (!mediaRecorder) {
+                try {
+                    const stream = document.getElementById('camera-stream').srcObject;
+                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                    recordedChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            recordedChunks.push(event.data);
+                        }
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    ind.style.display = 'block';
+                    btn.style.borderRadius = '10px';
+                    btn.style.transform = 'scale(0.8)';
+                } catch (e) {
+                    showToast("Recording not supported: " + e.message, "error");
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                ind.style.display = 'none';
+                btn.style.borderRadius = '50%';
+                btn.style.transform = 'scale(1)';
+            }
+        };
+
+        window.saveVideo = () => {
+            const blob = new Blob(recordedChunks, {
+                type: "video/webm"
+            });
+            const file = new File([blob], "video_clip.webm", { type: "video/webm" });
+            processImageFile(file);
+            closeCamera();
+        };
+
+        window.capturePhoto = () => {
+            const video = document.getElementById('camera-stream');
+            const canvas = document.getElementById('camera-canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob((blob) => {
+                const file = new File([blob], "camera_capture.jpg", { type: "image/jpeg" });
+                processImageFile(file);
+                closeCamera();
+            }, 'image/jpeg', 0.9);
+        };
+
+        window.handleZoom = (val) => {
+            const video = document.getElementById('camera-stream');
+            if (!cameraStream) return;
+
+            const track = cameraStream.getVideoTracks()[0];
+            const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+
+            if (capabilities.zoom) {
+                track.applyConstraints({ advanced: [{ zoom: parseFloat(val) }] })
+                    .catch(e => console.log("Zoom error:", e));
+            } else {
+                video.style.transform = `scale(${val})`;
+            }
+        }
+
+        window.forceSubmit = (detected) => {
+            const resDiv = document.getElementById('final-res');
+            resDiv.innerText = `âœ… Garbage (Manual)`;
+            resDiv.style.color = 'var(--success)';
+            resDiv.dataset.val = "Manual Override (" + detected + ")";
+            document.getElementById('submit-btn').disabled = false;
+        }
+
+        window.submitComplaint = async () => {
+            if (!currentImageFile) {
+                showToast("Please upload a photo of the garbage.", "error");
+                return;
+            }
+
+            const btn = document.getElementById('submit-btn');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+            btn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append("image", currentImageFile);
+
+                const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const imgData = await imgRes.json();
+
+                if (!imgData.success) throw new Error("Image Upload Failed");
+
+                const imageUrl = imgData.data.url;
+                const user = JSON.parse(localStorage.getItem('user'));
+                const resEl = document.getElementById('final-res');
+                const wasteType = (resEl && resEl.dataset.val) ? resEl.dataset.val : "General Waste";
+
+
+                const complaintsRef = ref(db, 'complaints');
+                const newRef = push(complaintsRef);
+                await set(newRef, {
+                    image_url: imageUrl,
+                    lat: currentLat || 0,
+                    lng: currentLng || 0,
+                    userId: user.email,
+                    userName: user.name,
+                    status: 'pending',
+                    type: wasteType,
+                    timestamp: Date.now()
+                });
+
+                showToast("Complaint Submitted Successfully!", "success");
+                resetReportForm();
+
+            } catch (err) {
+                console.error(err);
+                if (err.message === "Image Upload Failed") {
+                } else {
+                    showToast("Error: " + err.message, "error");
+                }
+                btn.innerHTML = "SUBMIT REPORT <i class='fa-solid fa-paper-plane'></i>";
+                btn.classList.add('btn-glow');
+                btn.disabled = false;
+            }
+        };
+
+        window.resetReportForm = () => {
+            currentImageFile = null;
+
+            if (document.getElementById('file-cam')) document.getElementById('file-cam').value = "";
+            if (document.getElementById('file-gallery')) document.getElementById('file-gallery').value = "";
+
+            document.getElementById('preview-container').style.display = 'none';
+            document.getElementById('image-preview').src = "";
+            document.getElementById('upload-area').style.display = 'block';
+            document.getElementById('ai-result').style.display = 'none';
+
+            if (document.getElementById('zoom-slider')) document.getElementById('zoom-slider').value = 1;
+
+
+            const btn = document.getElementById('submit-btn');
+            btn.innerHTML = "SUBMIT REPORT <i class='fa-solid fa-paper-plane'></i>";
+            btn.disabled = true;
+            btn.classList.remove('btn-glow');
+        };
+
+        function loadUserData(email) {
+            if (!email) return;
+
+            const userId = email.replace(/\./g, '_');
+            const userRef = ref(db, 'users/' + userId);
+
+            onValue(userRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    currentUserData = data;
+                    document.getElementById('user-points').innerText = data.points || 0;
+                    document.getElementById('user-reports').innerText = data.reports || 0;
+
+                    if (document.getElementById('view-profile') && document.getElementById('view-profile').style.display === 'block') {
+                        populateProfileView();
+                    }
+                } else {
+                    const initData = { points: 0, reports: 0, email: email };
+                    set(userRef, initData);
+                    currentUserData = initData;
+                }
+            });
+
+            const complaintsRef = ref(db, 'complaints');
+            onValue(complaintsRef, (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
+
+                const myComplaints = Object.entries(data)
+                    .map(([key, val]) => ({ id: key, ...val }))
+                    .filter(c => c.userId === email)
+                    .sort((a, b) => b.timestamp - a.timestamp);
+
+                const pendingCount = myComplaints.filter(c => c.status === 'pending').length;
+                const pendingEl = document.getElementById('user-pending');
+                if (pendingEl) pendingEl.innerText = pendingCount;
+
+                const totalReports = myComplaints.length;
+                const reportsEl = document.getElementById('user-reports');
+                if (reportsEl) reportsEl.innerText = totalReports;
+
+                if (currentUserData) currentUserData.reports = totalReports;
+
+                const activityList = document.getElementById('activity-list');
+                if (myComplaints.length === 0) {
+                    activityList.innerHTML = `
+                        <div class="glass" style="text-align: center; color: var(--text-light); padding: 40px;">
+                            <i class="fa-solid fa-seedling" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
+                            <p>No activity yet. Start by reporting waste!</p>
+                        </div>`;
+                    return;
+                }
+
+                let html = '';
+                myComplaints.forEach(c => {
+                    const date = new Date(c.timestamp).toLocaleDateString();
+
+
+                    const statusClass = `status-${c.status || 'pending'}`;
+                    const statusIcon = c.status === 'resolved' ? 'fa-check-circle' : (c.status === 'rejected' ? 'fa-times-circle' : 'fa-clock');
+
+
+                    const deleteBtn = `<button class="delete-btn" onclick="deleteComplaint('${c.id}')" title="Delete Report"><i class="fa-solid fa-trash"></i></button>`;
+
+                    html += `
+                        <div class="glass ${statusClass}" style="padding: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; border-radius: 12px; box-shadow: var(--shadow);">
+                            <div style="width: 50px; height: 50px; border-radius: 8px; overflow: hidden; flex-shrink: 0;">
+                                <img src="${c.image_url}" style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0; font-size: 1rem;">${c.type}</h4>
+                                <small style="opacity: 0.8;">${date}</small>
+                            </div>
+                            <div style="text-align: right; display:flex; align-items:center; justify-content:flex-end; gap: 10px;">
+                                 <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                                    <span style="font-weight: bold; font-size: 0.8rem; text-transform: uppercase;">
+                                        ${c.status === 'resolved' ? 'Resolved' : c.status}
+                                    </span>
+                                    ${c.status === 'resolved' ? '<small style="color:var(--success); font-size:0.7rem;">+10 Pts</small>' : ''}
+                                 </div>
+                                 <div style="width:1px; height:20px; background:rgba(0,0,0,0.1); margin:0 5px;"></div>
+                                 ${deleteBtn}
+                            </div>
+                        </div>
+                    `;
+                });
+                activityList.innerHTML = html;
+            });
+        }
+
+        window.deleteComplaint = (id) => {
+            if (confirm("Are you sure you want to delete this report?")) {
+                remove(ref(db, 'complaints/' + id))
+                    .then(() => showToast("Report deleted.", "success"))
+                    .catch(err => showToast("Error: " + err.message, "error"));
+            }
+        }
+
+        function loadLeaderboard() {
+            const container = document.getElementById('leaderboard-list');
+            const usersRef = ref(db, 'users');
+
+            onValue(usersRef, (snapshot) => {
+                const data = snapshot.val();
+                if (!data) {
+                    container.innerHTML = '<div style="padding:10px; opacity:0.6">No users found</div>';
+                    return;
+                }
+
+                const sortedUsers = Object.values(data).sort((a, b) => (b.points || 0) - (a.points || 0));
+
+                let html = '';
+                const currentUserEmail = JSON.parse(localStorage.getItem('user') || '{}').email;
+
+                sortedUsers.forEach((u, i) => {
+                    const isMe = u.email === currentUserEmail;
+                    const rank = i + 1;
+                    let rankDisplay = `<span style="font-weight: bold; width: 30px; color: var(--text-light); text-align:center;">#${rank}</span>`;
+
+                    if (rank === 1) rankDisplay = '<i class="fa-solid fa-medal" style="width: 30px; text-align:center; color: #FFD700; font-size: 1.5rem;"></i>';
+                    if (rank === 2) rankDisplay = '<i class="fa-solid fa-medal" style="width: 30px; text-align:center; color: #C0C0C0; font-size: 1.5rem;"></i>';
+                    if (rank === 3) rankDisplay = '<i class="fa-solid fa-medal" style="width: 30px; text-align:center; color: #CD7F32; font-size: 1.5rem;"></i>';
+
+                    const highlightStyle = isMe ? 'background: rgba(67, 97, 238, 0.1); border: 2px solid var(--primary); border-radius: 8px;' : 'border-bottom: 1px solid #eee;';
+
+                    html += `
+                        <div style="display: flex; justify-content: space-between; padding: 12px; align-items: center; ${highlightStyle}">
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                ${rankDisplay}
+                                <div style="display:flex; flex-direction:column;">
+                                    <span style="font-weight: 600; text-transform: capitalize;">${u.name || (u.email ? u.email.split('@')[0] : 'User')} ${isMe ? '(You)' : ''}</span>
+                                    <small style="font-size: 0.75rem; color: var(--text-light);">${u.reports || 0} Reports</small>
+                                </div>
+                            </div>
+                            <span style="font-weight: bold; color: var(--primary); font-size: 1.1rem;">${u.points || 0}</span>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            });
+        }
+
+        function initMap() {
+            if (document.getElementById('user-map') && !map) {
+                map = L.map('user-map', { scrollWheelZoom: false }).setView([12.9716, 77.5946], 12);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(pos => {
+                        const lat = pos.coords.latitude;
+                        const lng = pos.coords.longitude;
+
+                        currentLat = lat;
+                        currentLng = lng;
+
+                        map.setView([lat, lng], 15);
+
+                        L.circleMarker([lat, lng], {
+                            radius: 10,
+                            fillColor: '#4361ee',
+                            color: '#fff',
+                            weight: 3,
+                            fillOpacity: 0.9
+                        }).addTo(map).bindPopup("<b>You are here</b>").openPopup();
+                    });
+                }
+
+                const complaintsRef = ref(db, 'complaints');
+                onValue(complaintsRef, (snapshot) => {
+                    const data = snapshot.val();
+                    if (!data) return;
+
+                    const markers = [];
+                    Object.values(data).forEach(val => {
+                        if (val.lat && val.lng) {
+                            const color = val.status === 'resolved' ? '#4cc9f0' : '#f8961e';
+                            const marker = L.circleMarker([val.lat, val.lng], {
+                                radius: 8,
+                                fillColor: color,
+                                color: '#fff',
+                                weight: 2,
+                                opacity: 1,
+                                fillOpacity: 0.8
+                            }).addTo(map);
+                            marker.bindPopup(`<b>${val.type}</b><br>${val.status}`);
+                            markers.push(marker);
+                        }
+                    });
+
+                    if (markers.length > 0) {
+                        const group = new L.featureGroup(markers);
+                        map.fitBounds(group.getBounds().pad(0.1));
+                    }
+                });
+            }
+        }
+
+    </script>
+
+
+    <script>
+        window.requestLocationValues = () => {
+            const locStat = document.getElementById('loc-status');
+            if (locStat) locStat.innerHTML = `<span style="color:var(--text-light)"><i class="fa-solid fa-circle-notch fa-spin"></i> Detecting...</span>`;
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        currentLat = pos.coords.latitude;
+                        currentLng = pos.coords.longitude;
+                        if (locStat) locStat.innerHTML = `<span style="color:green"><i class="fa-solid fa-check"></i> Location Locked</span>`;
+                    },
+                    (err) => {
+                        console.log("Auto-Loc Skip:", err);
+                        currentLat = 0;
+                        currentLng = 0;
+                        if (locStat) {
+                            locStat.innerHTML = `
+                                <span style="color:#f39c12"><i class="fa-solid fa-circle-minus"></i> Location Skipped (Defaulting)</span>
+                            `;
+                        }
+                    },
+                    { enableHighAccuracy: false, timeout: 5000 }
+                );
+            } else {
+                if (locStat) locStat.innerHTML = "GPS Not Supported";
+            }
+        }
+
+    </script>
+</body>
+
+</html>
