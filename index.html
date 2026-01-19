@@ -413,7 +413,7 @@
     <div id="toast-container"></div>
 
     <div id="app-header"
-        style="display: none; padding: 50px 20px 20px 20px; justify-content: space-between; align-items: center;">
+        style="display: none; padding: 15px 20px 20px 20px; justify-content: space-between; align-items: center;">
         <div>
             <h2 style="color: var(--primary); margin-bottom: 0; display: flex; align-items: center; gap: 8px;">
                 <img src="logo.png" alt="Logo" style="width: 30px; height: 30px;">
@@ -441,7 +441,7 @@
         </div>
 
         <div id="login-card" class="auth-card">
-            <h2 style="margin-bottom: 10px; color: var(--primary);">Welcome Backuuuu</h2>
+            <h2 style="margin-bottom: 10px; color: var(--primary);">Welcome Back</h2>
             <p style="color: var(--text-light); margin-bottom: 30px;">Sign in to help keep your city clean.</p>
 
             <form onsubmit="event.preventDefault(); handleLogin();">
@@ -599,7 +599,7 @@
 
                 <div id="upload-area" style="text-align: center;">
                     <div style="display: flex; gap: 15px; justify-content: center;">
-                        <div onclick="startCamera()"
+                        <div onclick="document.getElementById('file-cam').click()"
                             style="flex: 1; padding: 30px 20px; background: rgba(67, 97, 238, 0.1); border: 2px dashed var(--primary); border-radius: 20px; cursor: pointer; transition: all 0.2s;">
                             <div
                                 style="width: 50px; height: 50px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto; color: white; font-size: 1.2rem;">
@@ -1472,6 +1472,7 @@
                     image_url: imageUrl,
                     lat: currentLat || 0,
                     lng: currentLng || 0,
+                    pincode: window.currentPincode || '',
                     userId: user.email,
                     userName: user.name,
                     status: 'pending',
@@ -1660,7 +1661,9 @@
             if (document.getElementById('user-map') && !map) {
                 // Default to India (Generic) instead of specific location
                 map = L.map('user-map', { scrollWheelZoom: false }).setView([20.5937, 78.9629], 5);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                }).addTo(map);
 
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(pos => {
@@ -1729,6 +1732,16 @@
                         currentLat = pos.coords.latitude;
                         currentLng = pos.coords.longitude;
                         if (locStat) locStat.innerHTML = `<span style="color:green"><i class="fa-solid fa-check"></i> Location Locked</span>`;
+
+                        // Fetch Pincode
+                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLat}&lon=${currentLng}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.address && data.address.postcode) {
+                                    window.currentPincode = data.address.postcode;
+                                    if (locStat) locStat.innerHTML += ` <small>(${window.currentPincode})</small>`;
+                                }
+                            }).catch(e => console.log("Pincode fetch error", e));
                     },
                     (err) => {
                         console.log("Auto-Loc Failed:", err);
