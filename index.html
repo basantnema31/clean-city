@@ -1608,7 +1608,12 @@
         }
 
         window.shareImage = async () => {
-            if (!window.generatedBlob) return showToast("Generating...", "error");
+            const statusEl = document.getElementById('share-status-msg');
+            if (statusEl) {
+                statusEl.innerText = "⏳ Generating Link... Please Wait.";
+                statusEl.style.color = "var(--primary)";
+            }
+            // if (!window.generatedBlob) return showToast("Generating...", "error");
 
             // Try Native Share
             if (navigator.share && navigator.canShare) {
