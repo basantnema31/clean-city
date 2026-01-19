@@ -1128,8 +1128,7 @@
       const data = currentComplaints[id];
       document.getElementById("modal-type").innerText = data.type;
       document.getElementById("modal-img").src = data.image_url;
-      document.getElementById("modal-loc").innerText =
-        `${data.lat}, ${data.lng}`;
+      document.getElementById("modal-loc").innerText = data.pincode || `${data.lat}, ${data.lng}`;
       document.getElementById("modal-user").innerText = data.userId || "Anon";
       document.getElementById("modal-time").innerText = new Date(
         data.timestamp,
