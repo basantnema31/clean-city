@@ -1679,15 +1679,9 @@
                         const oldBtn = document.getElementById('manual-link-btn');
                         if (oldBtn) oldBtn.remove();
 
-                        const container = document.getElementById('share-modal').querySelector('div');
-                        const linkBtn = document.createElement('a');
-                        linkBtn.id = 'manual-link-btn';
-                        linkBtn.className = 'btn';
-                        linkBtn.href = url;
-                        linkBtn.target = "_blank";
-                        linkBtn.style.cssText = "background: #333; margin-top:10px; display:block;";
-                        linkBtn.innerHTML = '<i class="fa-solid fa-external-link"></i> Open Image';
-                        container.appendChild(linkBtn);
+                        // Manual Link Button REMOVED to prevent App Exit Loop
+                        const oldBtn = document.getElementById('manual-link-btn');
+                        if (oldBtn) oldBtn.remove();
 
                     } else {
                         showToast("Link Gen Failed. Try Screenshot.", "error");
