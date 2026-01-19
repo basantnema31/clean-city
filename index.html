@@ -651,14 +651,14 @@
 
                 <div id="upload-area" style="text-align: center;">
                     <div style="display: flex; gap: 15px; justify-content: center;">
-                        <label for="file-cam"
+                        <div onclick="triggerCameraWithPermission()"
                             style="flex: 1; padding: 30px 20px; background: rgba(67, 97, 238, 0.1); border: 2px dashed var(--primary); border-radius: 20px; cursor: pointer; transition: all 0.2s; display: block;">
                             <div
                                 style="width: 50px; height: 50px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto; color: white; font-size: 1.2rem;">
                                 <i class="fa-solid fa-camera"></i>
                             </div>
                             <span style="font-weight: 600; color: var(--primary);">Take Photo</span>
-                        </label>
+                        </div>
 
                         <label for="file-gallery"
                             style="flex: 1; padding: 30px 20px; background: rgba(67, 97, 238, 0.05); border: 2px dashed var(--primary); border-radius: 20px; cursor: pointer; transition: all 0.2s; display: block;">
