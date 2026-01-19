@@ -2078,6 +2078,36 @@
                 e.preventDefault(); // Block pull-down
             }
         }, { passive: false });
+
+        // Explicitly Request Camera Permission before opening Input
+        window.triggerCameraWithPermission = async () => {
+            // 1. Try to get Permission via getUserMedia
+            try {
+                showToast("Checking access...", "info");
+                // Use Environment camera preference
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+
+                // If we get here, Permission is GRANTED
+                // Stop the stream immediately
+                stream.getTracks().forEach(track => track.stop());
+
+                // 2. Now Open Native Camera (Input click)
+                const input = document.getElementById('file-cam');
+                // Temporarily unhide to ensure click works? No, visually-hidden is fine usually.
+                input.click();
+
+            } catch (err) {
+                console.error("Camera Error:", err);
+                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                    alert("CAMERA PERMISSION DENIED! 🚫\n\n1. Go to Settings > Apps > CleanCity\n2. Tap Permissions\n3. Allow Camera\n\nThen try again!");
+                } else {
+                    alert("Camera Error: " + err.message + "\nTry settings manually.");
+                }
+                // Try fallback click anyway
+                document.getElementById('file-cam').click();
+            }
+        }
+
     </script>
 </body>
 
