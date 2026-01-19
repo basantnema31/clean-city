@@ -1167,8 +1167,8 @@
         };
 
         window.runAIAnalysis = (imgElement) => {
-
             const aiRes = document.getElementById('ai-result');
+
             if (aiModel) {
                 aiRes.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing...';
                 aiRes.style.display = 'block';
@@ -1211,19 +1211,19 @@
                             const match = topN.find(p => wasteKeywords.some(k => p.className.toLowerCase().includes(k)));
                             const displayName = match ? match.className.split(',')[0] : topName;
 
-                            resDiv.innerText = `âœ… ${displayName}`;
+                            resDiv.innerText = `✅ ${displayName}`;
                             resDiv.style.color = 'var(--success)';
                             resDiv.dataset.val = displayName;
                             document.getElementById('submit-btn').disabled = false;
                         } else {
                             resDiv.innerHTML = `
-                                    âš ï¸ <b>Not Garbage</b><br>
-                                    <small style="color: #666;">(AI saw: ${topName})</small>
-                                    <br>
-                                    <button class="btn btn-outline" style="margin-top: 10px; width: 100%; border: 1px solid var(--primary); color: var(--primary); background: transparent;" onclick="forceSubmit('${topName}')">
-                                        Mistake? Report Anyway
-                                    </button>
-                                `;
+                                ⚠️ <b>Not Garbage</b><br>
+                                <small style="color: #666;">(AI saw: ${topName})</small>
+                                <br>
+                                <button class="btn btn-outline" style="margin-top: 10px; width: 100%; border: 1px solid var(--primary); color: var(--primary); background: transparent;" onclick="forceSubmit('${topName}')">
+                                    Mistake? Report Anyway
+                                </button>
+                            `;
                             resDiv.style.color = 'orange';
                             resDiv.dataset.val = 'Unknown Object';
                         }
@@ -1232,6 +1232,12 @@
                         aiRes.innerText = "AI Error: " + err.message;
                     }
                 }, 500);
+
+            } else {
+                // Retry if model not loaded
+                aiRes.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading AI Model...';
+                aiRes.style.display = 'block';
+                setTimeout(() => window.runAIAnalysis(imgElement), 500);
             }
         }
 
@@ -1646,7 +1652,8 @@
 
         function initMap() {
             if (document.getElementById('user-map') && !map) {
-                map = L.map('user-map', { scrollWheelZoom: false }).setView([12.9716, 77.5946], 12);
+                // Default to India (Generic) instead of specific location
+                map = L.map('user-map', { scrollWheelZoom: false }).setView([20.5937, 78.9629], 5);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
                 if (navigator.geolocation) {
@@ -1666,7 +1673,10 @@
                             weight: 3,
                             fillOpacity: 0.9
                         }).addTo(map).bindPopup("<b>You are here</b>").openPopup();
-                    });
+                    }, (err) => {
+                        console.warn("GPS Error:", err);
+                        showToast("Location access denied. Showing default view.", "info");
+                    }, { enableHighAccuracy: true });
                 }
 
                 const complaintsRef = ref(db, 'complaints');
