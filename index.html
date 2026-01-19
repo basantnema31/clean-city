@@ -380,8 +380,8 @@
             border-radius: 50px;
             padding: 16px;
             position: fixed;
-            z-index: 100000;
-            /* Increased to be above modal */
+            z-index: 2147483647;
+            /* Max Z-Index for visibility */
             left: 50%;
             bottom: 30px;
             transform: translateX(-50%);
@@ -1649,24 +1649,47 @@
                 .then(data => {
                     if (data.success) {
                         const url = data.data.url;
-                        // Use window.location.href to force navigation if open fails
-                        // But try simple link first
-                        const a = document.createElement('a');
-                        a.href = url;
-                        // a.target = "_blank"; // WebViews sometimes block _blank
-                        a.download = "CleanCity_Hero.png"; // Hint
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
 
-                        showToast("Image Opened! Long-press to save.", "success");
+                        // Update Modal Preview 
+                        const preview = document.getElementById('share-card-preview');
+                        preview.src = url;
+
+                        // Attempt New Window 
+                        const win = window.open(url, '_blank');
+
+                        // Show instructions
+                        if (win) {
+                            showToast("Image Opened. Long Press to Save.", "success");
+                        } else {
+                            showToast("Image Ready! Long Press to Save.", "success");
+                        }
+
+                        // Add explicit button in modal if not exists
+                        // Clean up previous buttons
+                        const oldBtn = document.getElementById('manual-link-btn');
+                        if (oldBtn) oldBtn.remove();
+
+                        const container = document.getElementById('share-modal').querySelector('div');
+                        const linkBtn = document.createElement('a');
+                        linkBtn.id = 'manual-link-btn';
+                        linkBtn.className = 'btn';
+                        linkBtn.href = url;
+                        linkBtn.target = "_blank";
+                        linkBtn.style.cssText = "background: #333; margin-top:10px; display:block;";
+                        linkBtn.innerHTML = '<i class="fa-solid fa-external-link"></i> Open Image';
+                        container.appendChild(linkBtn);
+
                     } else {
                         showToast("Link Gen Failed. Try Screenshot.", "error");
                     }
                 })
-                .catch(e => {
-                    showToast("Error escaping WebView: " + e.message, "error");
-                });
+        } else {
+            showToast("Link Gen Failed. Try Screenshot.", "error");
+        }
+                })
+                .catch (e => {
+            showToast("Error escaping WebView: " + e.message, "error");
+        });
         }
 
         window.closeShareModal = () => {
