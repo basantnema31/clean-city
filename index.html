@@ -1532,7 +1532,11 @@
 
                 ctx.save();
                 ctx.beginPath();
-                ctx.roundRect(40, 360, 1000, 1000, 40); // Image Container
+                if (ctx.roundRect) {
+                    ctx.roundRect(40, 360, 1000, 1000, 40);
+                } else {
+                    ctx.rect(40, 360, 1000, 1000);
+                }
                 ctx.clip();
                 ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
                 ctx.restore();
@@ -1659,6 +1663,10 @@
                 });
 
                 showToast("Complaint Submitted Successfully!", "success");
+
+                // Trigger Share Modal
+                openShareModal(imageUrl, currentLat, currentLng);
+
                 resetReportForm();
 
             } catch (err) {
