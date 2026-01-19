@@ -57,6 +57,10 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        html {
+            overscroll-behavior-y: none;
+        }
+
         body {
             overscroll-behavior-y: none;
             background-color: var(--bg-body);
@@ -1772,6 +1776,21 @@
             }
         }
 
+    </script>
+    <script>
+        // Aggressive Pull-to-Refresh Blocker
+        let touchStartY = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        }, { passive: false });
+
+        document.addEventListener('touchmove', (e) => {
+            const touchY = e.touches[0].clientY;
+            const touchDiff = touchY - touchStartY;
+            if (window.scrollY === 0 && touchDiff > 0) {
+                e.preventDefault(); // Block pull-down
+            }
+        }, { passive: false });
     </script>
 </body>
 
