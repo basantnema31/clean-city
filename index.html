@@ -1437,6 +1437,12 @@
                 showToast("Please upload a photo of the garbage.", "error");
                 return;
             }
+            if (!currentLat || !currentLng) {
+                showToast("Location is MANDATORY. Please Enable GPS!", "error");
+                // Try to get location again
+                requestLocationValues();
+                return;
+            }
 
             const btn = document.getElementById('submit-btn');
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
@@ -1725,16 +1731,17 @@
                         if (locStat) locStat.innerHTML = `<span style="color:green"><i class="fa-solid fa-check"></i> Location Locked</span>`;
                     },
                     (err) => {
-                        console.log("Auto-Loc Skip:", err);
-                        currentLat = 0;
-                        currentLng = 0;
+                        console.log("Auto-Loc Failed:", err);
+                        currentLat = null;
+                        currentLng = null;
                         if (locStat) {
                             locStat.innerHTML = `
-                                <span style="color:#f39c12"><i class="fa-solid fa-circle-minus"></i> Location Skipped (Defaulting)</span>
+                                <span style="color:red; font-weight:bold;"><i class="fa-solid fa-circle-exclamation"></i> Location Required! Please Enable GPS.</span>
+                                <button onclick="requestLocationValues()" style="margin-left:5px; padding:2px 8px; font-size:0.8rem;">Retry</button>
                             `;
                         }
                     },
-                    { enableHighAccuracy: false, timeout: 5000 }
+                    { enableHighAccuracy: true, timeout: 10000 }
                 );
             } else {
                 if (locStat) locStat.innerHTML = "GPS Not Supported";
