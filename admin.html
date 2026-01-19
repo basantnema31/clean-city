@@ -1068,7 +1068,7 @@
                     <div class="info-col">
                         <div style="display: flex; justify-content: space-between;">
                             <h5 style="margin-bottom: 5px;">${val.type || "Unknown Waste"}</h5>
-                            <span class="status-badge ${statusClass}">${val.status || "Pending"}</span>
+                            <span class="status-badge ${statusClass}">${val.status === 'rejected' ? 'REJECTED (SPAM)' : (val.status || "Pending")}</span>
                         </div>
                         <p style="font-size: 0.85rem; color: var(--text-light);">
                             <i class="fa-solid fa-location-dot"></i> ${formatLoc(val.lat, val.lng)} 
@@ -1134,7 +1134,7 @@
         data.timestamp,
       ).toLocaleString();
       document.getElementById("modal-status").innerText = (
-        data.status || "PENDING"
+        data.status === 'rejected' ? 'REJECTED (SPAM)' : (data.status || "PENDING")
       ).toUpperCase();
       document.getElementById("detail-modal").style.display = "flex";
     };
