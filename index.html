@@ -1661,13 +1661,16 @@
                         const preview = document.getElementById('share-card-preview');
                         preview.src = url;
 
-                        // Attempt New Window 
-                        const win = window.open(url, '_blank');
+                        // DISABLED: window.open(url, '_blank'); 
 
-                        // Show instructions
-                        if (win) {
-                            showToast("Image Opened. Long Press to Save.", "success");
-                        } else {
+                        const statusEl = document.getElementById('share-status-msg');
+                        if (statusEl) {
+                            statusEl.innerText = "✅ Ready! Long Press image to Save.";
+                            statusEl.style.color = "green";
+                        }
+                        showToast("Ready! Long Press Image.", "success");
+
+                        if (true) {
                             showToast("Image Ready! Long Press to Save.", "success");
                         }
 
