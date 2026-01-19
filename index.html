@@ -1502,6 +1502,12 @@
             const modal = document.getElementById('share-modal');
             const preview = document.getElementById('share-card-preview');
             const canvas = document.getElementById('share-canvas');
+
+            // OPTIMIZATION: Reduce resolution to prevent crashes on low-end phones
+            // 540x960 is sufficient for mobile screens (Half of 1080p)
+            canvas.width = 540;
+            canvas.height = 960;
+
             const ctx = canvas.getContext('2d');
 
             modal.style.display = 'flex';
@@ -1510,32 +1516,34 @@
             img.crossOrigin = "Anonymous";
             img.onload = () => {
                 // Background
-                ctx.fillStyle = '#1a1a2e'; // Dark theme bg
-                ctx.fillRect(0, 0, 1080, 1920);
+                ctx.fillStyle = '#1a1a2e';
+                ctx.fillRect(0, 0, 540, 960);
 
                 // Featured Image (Center Crop)
-                // Draw image to fill center area
+                // Draw coordinates scaled by 0.5
+                // Container: x=20, y=180, w=500, h=500, r=20
                 const aspect = img.width / img.height;
                 let drawWidth, drawHeight, offsetX, offsetY;
 
-                if (aspect > 1080 / 1200) { // Wider
-                    drawHeight = 1200;
-                    drawWidth = 1200 * aspect;
-                    offsetX = (1080 - drawWidth) / 2;
-                    offsetY = 360;
+                // Target Box: 500x500
+                if (aspect > 540 / 600) { // Wider
+                    drawHeight = 600;
+                    drawWidth = 600 * aspect;
+                    offsetX = (540 - drawWidth) / 2;
+                    offsetY = 180;
                 } else { // Taller
-                    drawWidth = 1080;
-                    drawHeight = 1080 / aspect;
+                    drawWidth = 540;
+                    drawHeight = 540 / aspect;
                     offsetX = 0;
-                    offsetY = 360 - (drawHeight - 1200) / 2; // Center Vertically in slot
+                    offsetY = 180 - (drawHeight - 600) / 2;
                 }
 
                 ctx.save();
                 ctx.beginPath();
                 if (ctx.roundRect) {
-                    ctx.roundRect(40, 360, 1000, 1000, 40);
+                    ctx.roundRect(20, 180, 500, 500, 20);
                 } else {
-                    ctx.rect(40, 360, 1000, 1000);
+                    ctx.rect(20, 180, 500, 500);
                 }
                 ctx.clip();
                 ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
@@ -1543,71 +1551,79 @@
 
                 // Branding Top
                 ctx.fillStyle = '#4facfe';
-                ctx.font = 'bold 80px Poppins';
+                ctx.font = 'bold 40px Poppins'; // 80 -> 40
                 ctx.textAlign = 'center';
-                ctx.fillText("CleanCity Hero", 540, 200);
+                ctx.fillText("CleanCity Hero", 270, 100); // 540, 200 -> 270, 100
 
                 ctx.fillStyle = '#ffffff';
-                ctx.font = '40px Inter';
-                ctx.fillText("I just reported a cleaning spot!", 540, 280);
+                ctx.font = '20px Inter'; // 40 -> 20
+                ctx.fillText("I just reported a cleaning spot!", 270, 140);
 
                 // Bottom Info
                 ctx.fillStyle = '#ffffff';
-                ctx.font = '60px Poppins';
-                ctx.fillText("Status: REPORTED ✅", 540, 1500);
+                ctx.font = '30px Poppins'; // 60 -> 30
+                ctx.fillText("Status: REPORTED ✅", 270, 750); // 1500 -> 750
 
-                ctx.font = '40px Inter';
+                ctx.font = '20px Inter'; // 40 -> 20
                 ctx.fillStyle = '#aaaaaa';
                 const date = new Date().toLocaleDateString();
-                ctx.fillText(date + " • " + (window.currentPincode || "Rank " + (Math.floor(Math.random() * 20) + 1)), 540, 1600);
+                ctx.fillText(date + " • " + (window.currentPincode || "Rank " + (Math.floor(Math.random() * 20) + 1)), 270, 800);
 
                 // Logo/Footer
                 ctx.fillStyle = '#4facfe';
-                ctx.font = 'bold 50px Poppins';
-                ctx.fillText("#CleanCityApp", 540, 1800);
+                ctx.font = 'bold 25px Poppins'; // 50 -> 25
+                ctx.fillText("#CleanCityApp", 270, 900); // 1800 -> 900
 
                 // Export
-                const dataUrl = canvas.toDataURL('image/png');
+                const dataUrl = canvas.toDataURL('image/png', 0.8); // 80% quality
                 preview.src = dataUrl;
 
                 canvas.toBlob(blob => {
                     window.generatedBlob = blob;
-                }, 'image/png');
+                }, 'image/png', 0.8);
             };
             img.src = imageSrc;
         }
 
         window.shareImage = async () => {
-            if (!window.generatedBlob) return showToast("Generating image...", "error");
+            if (!window.generatedBlob) return showToast("Generating...", "error");
 
-            const file = new File([window.generatedBlob], "cleancity-share.png", { type: "image/png" });
-
-            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            // Try Native Share
+            if (navigator.share && navigator.canShare) {
                 try {
-                    await navigator.share({
-                        files: [file],
-                        title: 'CleanCity Report',
-                        text: 'I just contributed to keeping my city clean! #CleanCityApp'
-                    });
-                    showToast("Shared successfully!", "success");
-                } catch (err) {
-                    console.log("Share failed", err);
-                    // Fallback
-                    document.getElementById('download-btn').style.display = 'inline-block';
-                    showToast("Sharing failed, try downloading.", "error");
+                    const file = new File([window.generatedBlob], "cleancity_share.png", { type: "image/png" });
+                    if (navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: 'CleanCity Hero',
+                            text: 'Keeping my city clean! 🌿 #CleanCity'
+                        });
+                        return; // Success
+                    }
+                } catch (e) {
+                    console.log("Native share failed", e);
                 }
-            } else {
-                document.getElementById('download-btn').style.display = 'inline-block';
-                showToast("Native sharing not supported, please download.", "info");
             }
+
+            // Fallback: Show Download
+            document.getElementById('download-btn').style.display = 'inline-block';
+            showToast("Opening Download...", "info");
+            window.downloadImage();
         }
 
         window.downloadImage = () => {
-            const preview = document.getElementById('share-card-preview');
+            if (!window.generatedBlob) return;
+
+            // Use Blob URL for better Android compatibility
+            const url = URL.createObjectURL(window.generatedBlob);
             const a = document.createElement('a');
-            a.href = preview.src;
-            a.download = 'cleancity-hero.png';
+            a.href = url;
+            a.download = 'CleanCity_Hero.png';
+            document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
+
+            setTimeout(() => URL.revokeObjectURL(url), 100);
         }
 
         window.closeShareModal = () => {
