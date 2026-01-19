@@ -1724,6 +1724,16 @@
 
     <script>
         window.requestLocationValues = () => {
+            // Request Camera Permission concurrently
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(stream => {
+                        stream.getTracks().forEach(t => t.stop());
+                        console.log("Camera Permission Granted");
+                    })
+                    .catch(e => console.log("Camera Permission Denied", e));
+            }
+
             const locStat = document.getElementById('loc-status');
             if (locStat) locStat.innerHTML = `<span style="color:var(--text-light)"><i class="fa-solid fa-circle-notch fa-spin"></i> Detecting...</span>`;
 
