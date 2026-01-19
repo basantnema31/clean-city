@@ -2134,9 +2134,9 @@
 
             // If first time, show modal after small delay
             if (!hasAsked) {
-                setTimeout(() => {
-                    document.getElementById('permission-modal').style.display = 'flex';
-                }, 1500);
+                // Disabled by User Request
+                localStorage.setItem('permissions_requested', 'true');
+                // document.getElementById('permission-modal').style.display = 'flex';
             } else {
                 // Background check location anyway
                 requestLocationValues();
