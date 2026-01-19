@@ -1802,10 +1802,18 @@
                         console.log("Auto-Loc Failed:", err);
                         currentLat = null;
                         currentLng = null;
+                        let msg = "Location Required!";
+                        let btn = `<button onclick="requestLocationValues()" style="margin-left:5px; padding:2px 8px; font-size:0.8rem;">Retry</button>`;
+
+                        if (err.code === 1) { // Permission Denied
+                            msg = "Permission Denied! Enable in Settings.";
+                            btn = `<button onclick="alert('Please go to Phone Settings > Apps > CleanCity > Permissions > Location > Allow.')" style="margin-left:5px; padding:2px 8px; font-size:0.8rem; background:var(--danger); color:white;">Fix?</button> <button onclick="requestLocationValues()" style="margin-left:5px; padding:2px 8px; font-size:0.8rem;">Retry</button>`;
+                        }
+
                         if (locStat) {
                             locStat.innerHTML = `
-                                <span style="color:red; font-weight:bold;"><i class="fa-solid fa-circle-exclamation"></i> Location Required! Please Enable GPS.</span>
-                                <button onclick="requestLocationValues()" style="margin-left:5px; padding:2px 8px; font-size:0.8rem;">Retry</button>
+                                <span style="color:red; font-weight:bold; font-size: 0.8rem;"><i class="fa-solid fa-circle-exclamation"></i> ${msg}</span>
+                                ${btn}
                             `;
                         }
                     },
