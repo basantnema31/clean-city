@@ -1180,11 +1180,12 @@
           .catch((err) => alert("Error updating status: " + err.message));
       };
       window.deleteComplaint = () => {
-        if (!confirm("Are you sure?")) return;
-        if (!selectedComplaintId) return;
-        firebaseDb.remove(firebaseDb.ref(db, `complaints/${selectedComplaintId}`))
-          .then(() => closeModal())
-          .catch((err) => alert(err.message));
+        showConfirm("Are you sure you want to delete this report?", () => {
+          if (!selectedComplaintId) return;
+          firebaseDb.remove(firebaseDb.ref(db, "complaints/" + selectedComplaintId))
+            .then(() => closeModal())
+            .catch((err) => alert(err.message));
+        });
       };
       window.filterComplaints = () => {
         renderDashboard();
