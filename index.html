@@ -1143,15 +1143,17 @@
         }
 
         window.logout = () => {
-            if (confirm("Are you sure you want to logout?")) {
-                firebaseAuth.signOut(auth).then(() => {
-                    showToast("Logged Out Successfully", "success");
-                    localStorage.removeItem('user');
-                    location.reload();
-                }).catch((error) => {
-                    showToast("Error: " + error.message, "error");
-                });
-            }
+            console.log("Logout triggered");
+            // if (confirm("Are you sure you want to logout?")) {
+            firebaseAuth.signOut(auth).then(() => {
+                showToast("Logged Out Successfully", "success");
+                localStorage.removeItem('user');
+                location.reload();
+            }).catch((error) => {
+                console.error("Logout error", error);
+                showToast("Error: " + error.message, "error");
+            });
+            // }
         }
 
         firebaseAuth.onAuthStateChanged(auth, (user) => {
