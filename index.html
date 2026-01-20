@@ -2171,7 +2171,9 @@
             localStorage.setItem('terms_accepted_' + user.email, 'true');
 
             const userId = user.email.replace(/\./g, '_');
-            update(ref(db, 'users/' + userId), { termsAccepted: true })
+            // Use SET instead of UPDATE to avoid import issues
+            const termsRef = ref(db, 'users/' + userId + '/termsAccepted');
+            set(termsRef, true)
                 .then(() => showToast("Terms Accepted 🤝", "success"))
                 .catch(err => console.error(err));
         }
@@ -2198,7 +2200,7 @@
                     </div>
                 </div>
                 <p style="margin-top: 20px; font-size: 1rem; line-height: 1.4;">
-                    Hello 👋 <br> To continue using the app, please read and accept our Terms & Conditions.
+                    Hello <br> To continue using the app, please read and accept our Terms & Conditions.
                 </p>
             </div>
 
