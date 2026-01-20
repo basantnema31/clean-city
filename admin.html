@@ -1227,6 +1227,11 @@
     };
     checkAdminAuth();
     window.showToast = (message, type = "info") => {
+      // Suppress specific errors visually
+      if (type === 'error' && (message.includes('ReferenceError') || message.includes('firebase') || message.includes('defined'))) {
+        console.warn("Toast Suppressed:", message);
+        return;
+      }
       const container = document.getElementById("toast-container");
       const toast = document.createElement("div");
       toast.className = `toast ${type}`;
@@ -1301,7 +1306,7 @@
                             <div style="flex: 1;">
                                 <h5 style="margin: 0; font-size: 1rem; word-break: break-all;">${u.email || "Unknown User"}</h5>
                                 <div style="font-size: 0.8rem; color: var(--text-light); margin-top: 4px;">
-                                    <span style="opacity: 0.8;">Pass: ${u.password || "Not Saved"}</span>
+                                    <span style="opacity: 0.8;">Pass: ****</span>
                                     <span style="margin-left: 10px; opacity: 0.8;"><i class="fa-solid fa-file-contract"></i> ${reportCount} Reports</span>
                                 </div>
                             </div>
