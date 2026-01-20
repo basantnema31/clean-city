@@ -822,6 +822,11 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, push, set, onValue, remove, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // EXPOSE IMMEDIATELY
+        window.firebaseRef = ref;
+        window.firebaseSet = set;
+        window.firebaseUpdate = update;
+
 
 
 
@@ -1011,14 +1016,6 @@
             app = initializeApp(firebaseConfig);
             db = getDatabase(app);
         } catch (e) { console.error(e); }
-
-        // EXPOSE FIREBASE GLOBALS FOR T&C FIX
-        if (db) window.db = db;
-        try {
-            window.firebaseRef = ref;
-            window.firebaseSet = set;
-            console.log("Firebase Globals Exposed ✅");
-        } catch (e) { console.error("Expose Failed", e); }
 
 
 
