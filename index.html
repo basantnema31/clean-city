@@ -2068,6 +2068,10 @@
             }
         }
 
+        // Expose Firebase to Global Scope for external scripts
+        window.db = db;
+        window.firebaseRef = ref;
+        window.firebaseSet = set;
     </script>
     <script>
         // Aggressive Pull-to-Refresh Blocker
