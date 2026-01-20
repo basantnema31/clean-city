@@ -823,10 +823,9 @@
         import * as firebaseDb from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
         window.onerror = function (message, source, lineno, colno, error) {
-            console.error(message, lineno);
-            if (window.showToast) {
-                showToast("Error: " + message, "error");
-            }
+            console.error("Global Error Suppressed:", message, lineno);
+            // User Requested: Hide Frontend Errors
+            // if (window.showToast) showToast("Error: " + message, "error");
         };
 
         window.switchView = (viewName, navEl = null) => {
@@ -942,6 +941,10 @@
         }
 
         window.showToast = (message, type = 'info') => {
+            if (type === 'error' && (message.includes('ReferenceError') || message.includes('firebase') || message.includes('defined'))) {
+                console.warn("Toast Suppressed:", message);
+                return;
+            }
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
