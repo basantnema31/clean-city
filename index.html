@@ -820,7 +820,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@1.0.0"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, set, onValue, remove, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 
 
@@ -2079,8 +2079,12 @@
         document.addEventListener('touchmove', (e) => {
             const touchY = e.touches[0].clientY;
             const touchDiff = touchY - touchStartY;
+
+            // Allow scroll inside modal
+            if (e.target.closest('#terms-modal')) return;
+
             if (window.scrollY === 0 && touchDiff > 0) {
-                e.preventDefault(); // Block pull-down
+                e.preventDefault();
             }
         }, { passive: false });
 
