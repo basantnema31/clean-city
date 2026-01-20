@@ -221,7 +221,7 @@
         body {
             height: 100dvh;
             text-size-adjust: 100%;
-            overscroll-behavior: none;
+            /* overscroll-behavior: none; REMOVED: This causes stuck scroll at boundaries */
             overflow: hidden;
 
             display: flex;
@@ -243,8 +243,8 @@
             -webkit-overflow-scrolling: touch;
             width: 100%;
             padding-bottom: 120px;
-            /* overscroll-behavior-y: none; Removed to fix stuck scroll on mobile */
-            overscroll-behavior-y: auto;
+            overscroll-behavior-y: contain;
+            /* Fix: prevents chaining but allows local bounce */
         }
 
         h1,
