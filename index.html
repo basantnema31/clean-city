@@ -1214,6 +1214,16 @@
             });
         }
 
+        // Safety Timeout for Loader
+        setTimeout(() => {
+            const loader = document.getElementById('initial-loader');
+            if (loader && loader.style.display !== 'none') {
+                console.warn("Forcing loader hide via timeout");
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 500);
+            }
+        }, 3500);
+
         firebaseAuth.onAuthStateChanged(auth, (user) => {
             // Hide Loader
             const loader = document.getElementById('initial-loader');
