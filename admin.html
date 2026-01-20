@@ -910,161 +910,160 @@
         </button>
       </div>
     </div>
-  </div>
 
-  <!-- Custom Confirmation Modal -->
-  <div class="modal-overlay" id="confirm-modal"
-    style="z-index: 20000; display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; justify-content: center; align-items: center; background: rgba(0,0,0,0.5);">
-    <div class="glass modal" style="max-width: 400px; text-align: center;">
-      <h3 style="margin-bottom: 15px; color: var(--text-main);">Are you sure?</h3>
-      <p id="confirm-msg" style="margin-bottom: 25px; color: var(--text-light);">Do you really want to proceed?</p>
-      <div style="display: flex; justify-content: center; gap: 15px;">
-        <button class="btn btn-outline" onclick="closeConfirmModal()">Cancel</button>
-        <button class="btn btn-danger" id="confirm-yes-btn">Yes, Proceed</button>
+    <!-- Custom Confirmation Modal -->
+    <div class="modal-overlay" id="confirm-modal"
+      style="z-index: 20000; display: none; position: fixed; inset: 0; width: 100%; height: 100dvh; justify-content: center; align-items: center; background: rgba(0,0,0,0.5);">
+      <div class="glass modal" style="max-width: 400px; text-align: center; margin: 0 !important;">
+        <h3 style="margin-bottom: 15px; color: var(--text-main);">Are you sure?</h3>
+        <p id="confirm-msg" style="margin-bottom: 25px; color: var(--text-light);">Do you really want to proceed?</p>
+        <div style="display: flex; justify-content: center; gap: 15px;">
+          <button class="btn btn-outline" onclick="closeConfirmModal()">Cancel</button>
+          <button class="btn btn-danger" id="confirm-yes-btn">Yes, Proceed</button>
+        </div>
       </div>
     </div>
-  </div>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import * as firebaseDb from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-    const firebaseConfig = {
-      apiKey: "AIzaSyC4OeHd1iqPFSS2OtyWNy6DXgGhNmMbk54",
-      authDomain: "web-app-8edcb.firebaseapp.com",
-      databaseURL: "https://web-app-8edcb-default-rtdb.firebaseio.com",
-      projectId: "web-app-8edcb",
-      storageBucket: "web-app-8edcb.firebasestorage.app",
-      messagingSenderId: "23560015388",
-      appId: "1:23560015388:web:39bc4d9ca858975f62d9d9",
-    };
-    let app, db;
-    try {
-      app = initializeApp(firebaseConfig);
-      db = firebaseDb.getDatabase(app);
-      console.log("Firebase initialized");
-    } catch (e) {
-      console.error("Firebase Init Error: ", e);
-      alert("Please edit the HTML file to add your Firebase Config!");
-    }
-    let currentComplaints = {};
-    let selectedComplaintId = null;
-    let map = null;
-    let markers = [];
-    if (localStorage.getItem("adminLoggedIn") === "true") {
-      document.getElementById("auth-service").style.display = "none";
-      document.getElementById("dashboard-container").style.display = "grid";
-      setTimeout(() => {
-        initMap();
-        listenToComplaints();
-      }, 500);
-    }
-    window.handleLogin = async () => {
-      const id = document.getElementById("admin-id").value;
-      const pass = document.getElementById("admin-pass").value;
-      const btn = document.querySelector(".login-form .btn");
-      const originalText = btn.innerHTML;
-      if (!id || !pass) {
-        alert("Please enter credentials");
-        return;
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+      import * as firebaseDb from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+      const firebaseConfig = {
+        apiKey: "AIzaSyC4OeHd1iqPFSS2OtyWNy6DXgGhNmMbk54",
+        authDomain: "web-app-8edcb.firebaseapp.com",
+        databaseURL: "https://web-app-8edcb-default-rtdb.firebaseio.com",
+        projectId: "web-app-8edcb",
+        storageBucket: "web-app-8edcb.firebasestorage.app",
+        messagingSenderId: "23560015388",
+        appId: "1:23560015388:web:39bc4d9ca858975f62d9d9",
+      };
+      let app, db;
+      try {
+        app = initializeApp(firebaseConfig);
+        db = firebaseDb.getDatabase(app);
+        console.log("Firebase initialized");
+      } catch (e) {
+        console.error("Firebase Init Error: ", e);
+        alert("Please edit the HTML file to add your Firebase Config!");
       }
-      btn.innerHTML =
-        '<i class="fa-solid fa-spinner fa-spin"></i> Checking...';
-      btn.disabled = true;
-      setTimeout(() => {
-        if (id === "admin" && pass === "admin123") {
-          localStorage.setItem("adminAuth", "true");
-          checkAdminAuth();
-        } else {
-          alert("Invalid Credentials");
-          btn.innerHTML = originalText;
-          btn.disabled = false;
-        }
-      }, 800);
-    };
-    window.checkAdminAuth = () => {
-      const isAuth = localStorage.getItem("adminAuth");
-      if (isAuth === "true") {
+      let currentComplaints = {};
+      let selectedComplaintId = null;
+      let map = null;
+      let markers = [];
+      if (localStorage.getItem("adminLoggedIn") === "true") {
         document.getElementById("auth-service").style.display = "none";
         document.getElementById("dashboard-container").style.display = "grid";
-        initMap();
-        listenToComplaints();
-      } else {
-        document.getElementById("auth-service").style.display = "flex";
-        document.getElementById("dashboard-container").style.display = "none";
+        setTimeout(() => {
+          initMap();
+          listenToComplaints();
+        }, 500);
       }
-    };
-    const dashToggle = document.getElementById("admin-toggle");
-    const authToggle = document.getElementById("auth-toggle");
-    const root = document.documentElement;
-    const savedTheme = localStorage.getItem("theme") || "light";
-    root.setAttribute("data-theme", savedTheme);
-    updateIcons(savedTheme);
-    function bindToggle(btn) {
-      if (!btn) return;
-      btn.addEventListener("click", () => {
-        const currentTheme = root.getAttribute("data-theme");
-        const newTheme = currentTheme === "light" ? "dark" : "light";
-        root.setAttribute("data-theme", newTheme);
-        localStorage.setItem("theme", newTheme);
-        updateIcons(newTheme);
-      });
-    }
-    bindToggle(dashToggle);
-    bindToggle(authToggle);
-    function updateIcons(theme) {
-      const iconHtml =
-        theme === "dark"
-          ? '<i class="fa-solid fa-sun"></i>'
-          : '<i class="fa-solid fa-moon"></i>';
-      if (dashToggle) dashToggle.innerHTML = iconHtml;
-      if (authToggle) authToggle.innerHTML = iconHtml;
-    }
-    window.logout = () => {
-      // confirm removed for debugging
-      localStorage.removeItem("adminAuth");
-      localStorage.removeItem("adminLoggedIn");
-      location.reload();
-    };
-    function initMap() {
-      if (map) return;
-      map = L.map("admin-map", { scrollWheelZoom: false }).setView(
-        [20.5937, 78.9629],
-        5,
-      );
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-      }).addTo(map);
-    }
-    function listenToComplaints() {
-      const complaintsRef = firebaseDb.ref(db, "complaints");
-      firebaseDb.onValue(complaintsRef, (snapshot) => {
-        const data = snapshot.val();
-        currentComplaints = data || {};
-        renderDashboard();
-        updateStats();
-        updateMap();
-      });
-    }
-    function renderDashboard() {
-      const container = document.getElementById("complaints-list");
-      container.innerHTML = "";
-      const filter = document.getElementById("status-filter").value;
-      const list = Object.entries(currentComplaints).reverse();
-      if (list.length === 0) {
-        container.innerHTML =
-          '<div style="text-align: center; padding: 20px;">No complaints found.</div>';
-        return;
+      window.handleLogin = async () => {
+        const id = document.getElementById("admin-id").value;
+        const pass = document.getElementById("admin-pass").value;
+        const btn = document.querySelector(".login-form .btn");
+        const originalText = btn.innerHTML;
+        if (!id || !pass) {
+          alert("Please enter credentials");
+          return;
+        }
+        btn.innerHTML =
+          '<i class="fa-solid fa-spinner fa-spin"></i> Checking...';
+        btn.disabled = true;
+        setTimeout(() => {
+          if (id === "admin" && pass === "admin123") {
+            localStorage.setItem("adminAuth", "true");
+            checkAdminAuth();
+          } else {
+            alert("Invalid Credentials");
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+          }
+        }, 800);
+      };
+      window.checkAdminAuth = () => {
+        const isAuth = localStorage.getItem("adminAuth");
+        if (isAuth === "true") {
+          document.getElementById("auth-service").style.display = "none";
+          document.getElementById("dashboard-container").style.display = "grid";
+          initMap();
+          listenToComplaints();
+        } else {
+          document.getElementById("auth-service").style.display = "flex";
+          document.getElementById("dashboard-container").style.display = "none";
+        }
+      };
+      const dashToggle = document.getElementById("admin-toggle");
+      const authToggle = document.getElementById("auth-toggle");
+      const root = document.documentElement;
+      const savedTheme = localStorage.getItem("theme") || "light";
+      root.setAttribute("data-theme", savedTheme);
+      updateIcons(savedTheme);
+      function bindToggle(btn) {
+        if (!btn) return;
+        btn.addEventListener("click", () => {
+          const currentTheme = root.getAttribute("data-theme");
+          const newTheme = currentTheme === "light" ? "dark" : "light";
+          root.setAttribute("data-theme", newTheme);
+          localStorage.setItem("theme", newTheme);
+          updateIcons(newTheme);
+        });
       }
-      list.forEach(([key, val], index) => {
-        if (filter !== "all" && val.status !== filter) return;
-        const statusClass = `status-${val.status || "pending"}`;
-        const card = document.createElement("div");
-        card.className = `glass complaint-card ${statusClass}`;
-        card.style.borderLeft = `5px solid var(--${getThemeColor(val.status)})`;
-        card.style.opacity = "0";
-        card.style.animation = `slideUpFade 0.4s ease-out forwards ${index * 0.05}s`;
-        card.innerHTML = `
+      bindToggle(dashToggle);
+      bindToggle(authToggle);
+      function updateIcons(theme) {
+        const iconHtml =
+          theme === "dark"
+            ? '<i class="fa-solid fa-sun"></i>'
+            : '<i class="fa-solid fa-moon"></i>';
+        if (dashToggle) dashToggle.innerHTML = iconHtml;
+        if (authToggle) authToggle.innerHTML = iconHtml;
+      }
+      window.logout = () => {
+        // confirm removed for debugging
+        localStorage.removeItem("adminAuth");
+        localStorage.removeItem("adminLoggedIn");
+        location.reload();
+      };
+      function initMap() {
+        if (map) return;
+        map = L.map("admin-map", { scrollWheelZoom: false }).setView(
+          [20.5937, 78.9629],
+          5,
+        );
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        }).addTo(map);
+      }
+      function listenToComplaints() {
+        const complaintsRef = firebaseDb.ref(db, "complaints");
+        firebaseDb.onValue(complaintsRef, (snapshot) => {
+          const data = snapshot.val();
+          currentComplaints = data || {};
+          renderDashboard();
+          updateStats();
+          updateMap();
+        });
+      }
+      function renderDashboard() {
+        const container = document.getElementById("complaints-list");
+        container.innerHTML = "";
+        const filter = document.getElementById("status-filter").value;
+        const list = Object.entries(currentComplaints).reverse();
+        if (list.length === 0) {
+          container.innerHTML =
+            '<div style="text-align: center; padding: 20px;">No complaints found.</div>';
+          return;
+        }
+        list.forEach(([key, val], index) => {
+          if (filter !== "all" && val.status !== filter) return;
+          const statusClass = `status-${val.status || "pending"}`;
+          const card = document.createElement("div");
+          card.className = `glass complaint-card ${statusClass}`;
+          card.style.borderLeft = `5px solid var(--${getThemeColor(val.status)})`;
+          card.style.opacity = "0";
+          card.style.animation = `slideUpFade 0.4s ease-out forwards ${index * 0.05}s`;
+          card.innerHTML = `
                     <div class="img-col">
                         <img src="${val.image_url || "https://via.placeholder.com/150"}" alt="Waste">
                     </div>
@@ -1088,228 +1087,228 @@
                         </button>
                     </div>
                 `;
-        container.appendChild(card);
-      });
-    }
-    function updateStats() {
-      const list = Object.values(currentComplaints);
-      document.getElementById("total-reports").innerText = list.length;
-      document.getElementById("pending-reports").innerText = list.filter(
-        (i) => i.status === "pending" || !i.status,
-      ).length;
-      document.getElementById("resolved-reports").innerText = list.filter(
-        (i) => i.status === "resolved",
-      ).length;
-    }
-    function updateMap() {
-      if (!map) return;
-      markers.forEach((m) => map.removeLayer(m));
-      markers = [];
-      Object.entries(currentComplaints).forEach(([key, val]) => {
-        if (val.lat && val.lng) {
-          const color = getThemeColor(val.status);
-          const marker = L.circleMarker([val.lat, val.lng], {
-            radius: 8,
-            fillColor: `var(--${color})`,
-            color: "#fff",
-            weight: 2,
-            opacity: 1,
-            fillOpacity: 0.8,
-          }).addTo(map);
-          marker.setStyle({ fillColor: getColorHex(val.status) });
-          marker.bindPopup(`<b>${val.type}</b><br>Status: ${val.status}`);
-          markers.push(marker);
-        }
-      });
-      if (markers.length > 0) {
-        const group = new L.featureGroup(markers);
-        map.fitBounds(group.getBounds().pad(0.1), { maxZoom: 8 });
+          container.appendChild(card);
+        });
       }
-    }
-    window.openModal = (id) => {
-      selectedComplaintId = id;
-      const data = currentComplaints[id];
-      document.getElementById("modal-type").innerText = data.type;
-      document.getElementById("modal-img").src = data.image_url;
-      document.getElementById("modal-loc").innerText = data.pincode || `${data.lat}, ${data.lng}`;
-      document.getElementById("modal-user").innerText = data.userId || "Anon";
-      document.getElementById("modal-time").innerText = new Date(
-        data.timestamp,
-      ).toLocaleString();
-      document.getElementById("modal-status").innerText = (
-        data.status === 'rejected' ? 'REJECTED (SPAM)' : (data.status || "PENDING")
-      ).toUpperCase();
-      document.getElementById("detail-modal").style.display = "flex";
-    };
-    window.closeModal = () => {
-      document.getElementById("detail-modal").style.display = "none";
-    };
-    window.updateStatus = (newStatus) => {
-      if (!selectedComplaintId) return;
-      const key = selectedComplaintId;
-      const complaint = currentComplaints[key];
-      const updates = {};
-      updates[`/complaints/${key}/status`] = newStatus;
-      if (newStatus === "resolved") {
-        const userEmail = complaint.userId;
-        console.log("Rewarding User:", userEmail);
-        if (userEmail && userEmail.includes("@")) {
-          const uid = userEmail.replace(/\./g, "_");
-          const userRef = firebaseDb.ref(db, `users/${uid}`);
-          firebaseDb.get(userRef)
-            .then((snap) => {
-              const data = snap.val() || {};
-              const newPoints = (data.points || 0) + 10;
-              const newReports = (data.reports || 0) + 1;
-              firebaseDb.update(userRef, { points: newPoints, reports: newReports })
-                .then(() =>
-                  alert(`SUCCESS: Added 10 Points to ${userEmail}!`),
-                )
-                .catch((e) => alert("ERROR Writing Points: " + e.message));
-            })
-            .catch((e) => alert("ERROR Reading User: " + e.message));
-        } else {
-          alert(
-            `WARNING: User ID '${userEmail}' is not a valid email. Cannot reward.`,
-          );
+      function updateStats() {
+        const list = Object.values(currentComplaints);
+        document.getElementById("total-reports").innerText = list.length;
+        document.getElementById("pending-reports").innerText = list.filter(
+          (i) => i.status === "pending" || !i.status,
+        ).length;
+        document.getElementById("resolved-reports").innerText = list.filter(
+          (i) => i.status === "resolved",
+        ).length;
+      }
+      function updateMap() {
+        if (!map) return;
+        markers.forEach((m) => map.removeLayer(m));
+        markers = [];
+        Object.entries(currentComplaints).forEach(([key, val]) => {
+          if (val.lat && val.lng) {
+            const color = getThemeColor(val.status);
+            const marker = L.circleMarker([val.lat, val.lng], {
+              radius: 8,
+              fillColor: `var(--${color})`,
+              color: "#fff",
+              weight: 2,
+              opacity: 1,
+              fillOpacity: 0.8,
+            }).addTo(map);
+            marker.setStyle({ fillColor: getColorHex(val.status) });
+            marker.bindPopup(`<b>${val.type}</b><br>Status: ${val.status}`);
+            markers.push(marker);
+          }
+        });
+        if (markers.length > 0) {
+          const group = new L.featureGroup(markers);
+          map.fitBounds(group.getBounds().pad(0.1), { maxZoom: 8 });
         }
       }
-      firebaseDb.update(firebaseDb.ref(db), updates)
-        .then(() => {
-          closeModal();
-        })
-        .catch((err) => alert("Error updating status: " + err.message));
-    };
-    window.deleteComplaint = () => {
-      if (!confirm("Are you sure?")) return;
-      if (!selectedComplaintId) return;
-      firebaseDb.remove(firebaseDb.ref(db, `complaints/${selectedComplaintId}`))
-        .then(() => closeModal())
-        .catch((err) => alert(err.message));
-    };
-    window.filterComplaints = () => {
-      renderDashboard();
-    };
-    function formatLoc(lat, lng) {
-      return `${parseFloat(lat).toFixed(4)}, ${parseFloat(lng).toFixed(4)}`;
-    }
-    function getThemeColor(status) {
-      if (status === "resolved") return "success";
-      if (status === "progress") return "primary";
-      if (status === "rejected") return "danger";
-      return "warning";
-    }
-    function getColorHex(status) {
-      if (status === "resolved") return "#4cc9f0";
-      if (status === "progress") return "#4361ee";
-      if (status === "rejected") return "#ff4d4d";
-      return "#f8961e";
-      return "#f8961e";
-    }
-    window.switchTab = (tab) => {
-      document.getElementById("dashboard-content-area").style.display =
-        "none";
-      document.getElementById("users-view").style.display = "none";
-      document
-        .querySelectorAll(".nav-item")
-        .forEach((el) => el.classList.remove("active"));
-      document.querySelectorAll(".nav-item").forEach((el) => {
-        if (el.getAttribute("onclick").includes(tab)) {
-          el.classList.add("active");
+      window.openModal = (id) => {
+        selectedComplaintId = id;
+        const data = currentComplaints[id];
+        document.getElementById("modal-type").innerText = data.type;
+        document.getElementById("modal-img").src = data.image_url;
+        document.getElementById("modal-loc").innerText = data.pincode || `${data.lat}, ${data.lng}`;
+        document.getElementById("modal-user").innerText = data.userId || "Anon";
+        document.getElementById("modal-time").innerText = new Date(
+          data.timestamp,
+        ).toLocaleString();
+        document.getElementById("modal-status").innerText = (
+          data.status === 'rejected' ? 'REJECTED (SPAM)' : (data.status || "PENDING")
+        ).toUpperCase();
+        document.getElementById("detail-modal").style.display = "flex";
+      };
+      window.closeModal = () => {
+        document.getElementById("detail-modal").style.display = "none";
+      };
+      window.updateStatus = (newStatus) => {
+        if (!selectedComplaintId) return;
+        const key = selectedComplaintId;
+        const complaint = currentComplaints[key];
+        const updates = {};
+        updates[`/complaints/${key}/status`] = newStatus;
+        if (newStatus === "resolved") {
+          const userEmail = complaint.userId;
+          console.log("Rewarding User:", userEmail);
+          if (userEmail && userEmail.includes("@")) {
+            const uid = userEmail.replace(/\./g, "_");
+            const userRef = firebaseDb.ref(db, `users/${uid}`);
+            firebaseDb.get(userRef)
+              .then((snap) => {
+                const data = snap.val() || {};
+                const newPoints = (data.points || 0) + 10;
+                const newReports = (data.reports || 0) + 1;
+                firebaseDb.update(userRef, { points: newPoints, reports: newReports })
+                  .then(() =>
+                    alert(`SUCCESS: Added 10 Points to ${userEmail}!`),
+                  )
+                  .catch((e) => alert("ERROR Writing Points: " + e.message));
+              })
+              .catch((e) => alert("ERROR Reading User: " + e.message));
+          } else {
+            alert(
+              `WARNING: User ID '${userEmail}' is not a valid email. Cannot reward.`,
+            );
+          }
         }
-      });
-      if (window.innerWidth <= 768) {
-        document.querySelector(".sidebar").classList.remove("active");
-        const overlay = document.querySelector(".sidebar-overlay");
-        if (overlay) overlay.classList.remove("active");
+        firebaseDb.update(firebaseDb.ref(db), updates)
+          .then(() => {
+            closeModal();
+          })
+          .catch((err) => alert("Error updating status: " + err.message));
+      };
+      window.deleteComplaint = () => {
+        if (!confirm("Are you sure?")) return;
+        if (!selectedComplaintId) return;
+        firebaseDb.remove(firebaseDb.ref(db, `complaints/${selectedComplaintId}`))
+          .then(() => closeModal())
+          .catch((err) => alert(err.message));
+      };
+      window.filterComplaints = () => {
+        renderDashboard();
+      };
+      function formatLoc(lat, lng) {
+        return `${parseFloat(lat).toFixed(4)}, ${parseFloat(lng).toFixed(4)}`;
       }
-      if (tab === "dashboard") {
+      function getThemeColor(status) {
+        if (status === "resolved") return "success";
+        if (status === "progress") return "primary";
+        if (status === "rejected") return "danger";
+        return "warning";
+      }
+      function getColorHex(status) {
+        if (status === "resolved") return "#4cc9f0";
+        if (status === "progress") return "#4361ee";
+        if (status === "rejected") return "#ff4d4d";
+        return "#f8961e";
+        return "#f8961e";
+      }
+      window.switchTab = (tab) => {
         document.getElementById("dashboard-content-area").style.display =
-          "block";
-      } else if (tab === "map") {
-        document.getElementById("dashboard-content-area").style.display =
-          "block";
+          "none";
+        document.getElementById("users-view").style.display = "none";
         document
-          .getElementById("admin-map")
-          .scrollIntoView({ behavior: "smooth" });
-      } else if (tab === "users") {
-        document.getElementById("users-view").style.display = "block";
-        loadAdminUserList();
-      }
-    };
-    checkAdminAuth();
-    window.showToast = (message, type = "info") => {
-      // Suppress specific errors visually
-      if (type === 'error' && (message.includes('ReferenceError') || message.includes('firebase') || message.includes('defined'))) {
-        console.warn("Toast Suppressed:", message);
-        return;
-      }
-      const container = document.getElementById("toast-container");
-      const toast = document.createElement("div");
-      toast.className = `toast ${type}`;
-      let icon = "fa-info-circle";
-      if (type === "success") icon = "fa-check-circle";
-      if (type === "error") icon = "fa-exclamation-circle";
-      toast.innerHTML = `
+          .querySelectorAll(".nav-item")
+          .forEach((el) => el.classList.remove("active"));
+        document.querySelectorAll(".nav-item").forEach((el) => {
+          if (el.getAttribute("onclick").includes(tab)) {
+            el.classList.add("active");
+          }
+        });
+        if (window.innerWidth <= 768) {
+          document.querySelector(".sidebar").classList.remove("active");
+          const overlay = document.querySelector(".sidebar-overlay");
+          if (overlay) overlay.classList.remove("active");
+        }
+        if (tab === "dashboard") {
+          document.getElementById("dashboard-content-area").style.display =
+            "block";
+        } else if (tab === "map") {
+          document.getElementById("dashboard-content-area").style.display =
+            "block";
+          document
+            .getElementById("admin-map")
+            .scrollIntoView({ behavior: "smooth" });
+        } else if (tab === "users") {
+          document.getElementById("users-view").style.display = "block";
+          loadAdminUserList();
+        }
+      };
+      checkAdminAuth();
+      window.showToast = (message, type = "info") => {
+        // Suppress specific errors visually
+        if (type === 'error' && (message.includes('ReferenceError') || message.includes('firebase') || message.includes('defined'))) {
+          console.warn("Toast Suppressed:", message);
+          return;
+        }
+        const container = document.getElementById("toast-container");
+        const toast = document.createElement("div");
+        toast.className = `toast ${type}`;
+        let icon = "fa-info-circle";
+        if (type === "success") icon = "fa-check-circle";
+        if (type === "error") icon = "fa-exclamation-circle";
+        toast.innerHTML = `
                 <i class="fa-solid ${icon}" style="font-size: 1.2rem; color: var(--text-${type === "info" ? "main" : type})"></i>
                 <span>${message}</span>
             `;
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.style.animation = "slideOut 0.3s ease-in forwards";
-        toast.addEventListener("animationend", () => {
-          toast.remove();
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.style.animation = "slideOut 0.3s ease-in forwards";
+          toast.addEventListener("animationend", () => {
+            toast.remove();
+          });
+        }, 3000);
+      };
+      window.toggleSidebar = () => {
+        document.querySelector(".sidebar").classList.toggle("active");
+        let overlay = document.querySelector(".sidebar-overlay");
+        if (!overlay) {
+          overlay = document.createElement("div");
+          overlay.className = "sidebar-overlay";
+          overlay.onclick = toggleSidebar;
+          document.body.appendChild(overlay);
+        }
+        overlay.classList.toggle("active");
+      };
+      let adminUsersData = {};
+      function loadAdminUserList() {
+        const list = document.getElementById("admin-users-list");
+        firebaseDb.onValue(firebaseDb.ref(db, "users"), (snapshot) => {
+          adminUsersData = snapshot.val() || {};
+          renderUserList();
         });
-      }, 3000);
-    };
-    window.toggleSidebar = () => {
-      document.querySelector(".sidebar").classList.toggle("active");
-      let overlay = document.querySelector(".sidebar-overlay");
-      if (!overlay) {
-        overlay = document.createElement("div");
-        overlay.className = "sidebar-overlay";
-        overlay.onclick = toggleSidebar;
-        document.body.appendChild(overlay);
       }
-      overlay.classList.toggle("active");
-    };
-    let adminUsersData = {};
-    function loadAdminUserList() {
-      const list = document.getElementById("admin-users-list");
-      firebaseDb.onValue(firebaseDb.ref(db, "users"), (snapshot) => {
-        adminUsersData = snapshot.val() || {};
-        renderUserList();
-      });
-    }
-    window.renderUserList = () => {
-      const list = document.getElementById("admin-users-list");
-      const searchTerm = document.getElementById("user-search")
-        ? document.getElementById("user-search").value.toLowerCase()
-        : "";
-      if (Object.keys(adminUsersData).length === 0) {
-        list.innerHTML =
-          '<div style="text-align: center;">No users registered yet.</div>';
-        return;
-      }
-      let html = "";
-      const sorted = Object.entries(adminUsersData).sort(
-        ([, a], [, b]) => (b.points || 0) - (a.points || 0),
-      );
-      let count = 0;
-      sorted.forEach(([uid, u], index) => {
-        if (
-          searchTerm &&
-          u.email &&
-          !u.email.toLowerCase().includes(searchTerm)
-        )
+      window.renderUserList = () => {
+        const list = document.getElementById("admin-users-list");
+        const searchTerm = document.getElementById("user-search")
+          ? document.getElementById("user-search").value.toLowerCase()
+          : "";
+        if (Object.keys(adminUsersData).length === 0) {
+          list.innerHTML =
+            '<div style="text-align: center;">No users registered yet.</div>';
           return;
-        count++;
-        const userEmail = u.email;
-        const reportCount = Object.values(currentComplaints).filter(
-          (c) => c.userId === userEmail,
-        ).length;
-        const animStyle = `animation: slideUpFade 0.4s ease-out forwards ${count * 0.05}s; opacity: 0;`;
-        html += `
+        }
+        let html = "";
+        const sorted = Object.entries(adminUsersData).sort(
+          ([, a], [, b]) => (b.points || 0) - (a.points || 0),
+        );
+        let count = 0;
+        sorted.forEach(([uid, u], index) => {
+          if (
+            searchTerm &&
+            u.email &&
+            !u.email.toLowerCase().includes(searchTerm)
+          )
+            return;
+          count++;
+          const userEmail = u.email;
+          const reportCount = Object.values(currentComplaints).filter(
+            (c) => c.userId === userEmail,
+          ).length;
+          const animStyle = `animation: slideUpFade 0.4s ease-out forwards ${count * 0.05}s; opacity: 0;`;
+          html += `
                     <div class="glass user-card" style="${animStyle} display: flex; justify-content: space-between; align-items: center; padding: 15px; margin-bottom: 10px; border-radius: 12px; border: 1px solid var(--glass-border);">
                         <div style="display: flex; align-items: center; gap: 15px;">
                             <div style="min-width: 45px; width: 45px; height: 45px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
@@ -1342,71 +1341,71 @@
                         </div>
                     </div>
                 `;
-      });
-      if (count === 0) {
-        html =
-          '<div style="text-align: center; padding: 20px;">No matching users found.</div>';
+        });
+        if (count === 0) {
+          html =
+            '<div style="text-align: center; padding: 20px;">No matching users found.</div>';
+        }
+        list.innerHTML = html;
+      };
+      window.adjustPoints = (uid, amount) => {
+        const userRef = firebaseDb.ref(db, "users/" + uid);
+        firebaseDb.get(userRef).then((snap) => {
+          const data = snap.val() || {};
+          const currentPoints = parseInt(data.points || 0);
+          const newPoints = currentPoints + amount;
+          firebaseDb.update(firebaseDb.ref(db, "users/" + uid), { points: newPoints })
+            .then(() => {
+              showToast(`Points Updated: ${newPoints}`, "success");
+            })
+            .catch((e) => showToast("Error: " + e.message, "error"));
+        });
+      };
+      /* Custom Confirmation Logic */
+      let confirmCallback = null;
+      window.showConfirm = (msg, callback) => {
+        document.getElementById('confirm-msg').innerText = msg;
+        confirmCallback = callback;
+        document.getElementById('confirm-modal').style.display = 'flex';
       }
-      list.innerHTML = html;
-    };
-    window.adjustPoints = (uid, amount) => {
-      const userRef = firebaseDb.ref(db, "users/" + uid);
-      firebaseDb.get(userRef).then((snap) => {
-        const data = snap.val() || {};
-        const currentPoints = parseInt(data.points || 0);
-        const newPoints = currentPoints + amount;
-        firebaseDb.update(firebaseDb.ref(db, "users/" + uid), { points: newPoints })
-          .then(() => {
-            showToast(`Points Updated: ${newPoints}`, "success");
-          })
-          .catch((e) => showToast("Error: " + e.message, "error"));
-      });
-    };
-    /* Custom Confirmation Logic */
-    let confirmCallback = null;
-    window.showConfirm = (msg, callback) => {
-      document.getElementById('confirm-msg').innerText = msg;
-      confirmCallback = callback;
-      document.getElementById('confirm-modal').style.display = 'flex';
-    }
-    window.closeConfirmModal = () => {
-      document.getElementById('confirm-modal').style.display = 'none';
-      confirmCallback = null;
-    }
-    document.getElementById('confirm-yes-btn').onclick = () => {
-      if (confirmCallback) confirmCallback();
-      closeConfirmModal();
-    }
+      window.closeConfirmModal = () => {
+        document.getElementById('confirm-modal').style.display = 'none';
+        confirmCallback = null;
+      }
+      document.getElementById('confirm-yes-btn').onclick = () => {
+        if (confirmCallback) confirmCallback();
+        closeConfirmModal();
+      }
 
-    window.deleteUser = (uid) => {
-      showConfirm("Are you sure you want to delete this user? This cannot be undone.", () => {
-        firebaseDb.remove(firebaseDb.ref(db, "users/" + uid))
-          .then(() => {
-            showToast("User deleted successfully", "success");
-          })
-          .catch((err) => showToast("Error: " + err.message, "error"));
-      });
-    };
-    window.clearAllUsers = () => {
-      showConfirm("⚠️ DANGER: This will delete ALL registered users and their points. Are you sure?", () => {
-        firebaseDb.remove(firebaseDb.ref(db, "users"))
-          .then(() => {
-            alert("All users have been deleted.");
-          })
-          .catch((err) => alert("Error: " + err.message));
-      });
-    };
+      window.deleteUser = (uid) => {
+        showConfirm("Are you sure you want to delete this user? This cannot be undone.", () => {
+          firebaseDb.remove(firebaseDb.ref(db, "users/" + uid))
+            .then(() => {
+              showToast("User deleted successfully", "success");
+            })
+            .catch((err) => showToast("Error: " + err.message, "error"));
+        });
+      };
+      window.clearAllUsers = () => {
+        showConfirm("⚠️ DANGER: This will delete ALL registered users and their points. Are you sure?", () => {
+          firebaseDb.remove(firebaseDb.ref(db, "users"))
+            .then(() => {
+              alert("All users have been deleted.");
+            })
+            .catch((err) => alert("Error: " + err.message));
+        });
+      };
 
-    // Override logout with custom confirm
-    const originalLogout = window.logout;
-    window.logout = () => {
-      showConfirm("Are you sure you want to logout?", () => {
-        localStorage.removeItem("adminAuth");
-        localStorage.removeItem("adminLoggedIn");
-        location.reload();
-      });
-    }
-  </script>
+      // Override logout with custom confirm
+      const originalLogout = window.logout;
+      window.logout = () => {
+        showConfirm("Are you sure you want to logout?", () => {
+          localStorage.removeItem("adminAuth");
+          localStorage.removeItem("adminLoggedIn");
+          location.reload();
+        });
+      }
+    </script>
 </body>
 
 </html>

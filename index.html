@@ -815,8 +815,9 @@
 
     <!-- Custom Confirmation Modal -->
     <div class="modal-overlay" id="confirm-modal"
-        style="z-index: 20000; display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; justify-content: center; align-items: center; background: rgba(0,0,0,0.5);">
-        <div class="glass modal" style="max-width: 350px; text-align: center; border: 1px solid var(--glass-border);">
+        style="z-index: 20000; display: none; position: fixed; inset: 0; height: 100dvh; justify-content: center; align-items: center; background: rgba(0,0,0,0.5);">
+        <div class="glass modal"
+            style="max-width: 350px; text-align: center; border: 1px solid var(--glass-border); margin: 0 !important;">
             <div
                 style="width: 50px; height: 50px; background: rgba(79, 172, 254, 0.1); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; font-size: 1.5rem;">
                 <i class="fa-solid fa-question"></i>
