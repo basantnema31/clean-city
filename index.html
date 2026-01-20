@@ -835,16 +835,7 @@
             }
         };
 
-        // EXPOSE FIREBASE GLOBALS IMMEDIATELY
-        window.db = getDatabase(initializeApp({
-            apiKey: "YOUR_API_KEY", // Note: Config seems missing in snippet, using getDatabase() usually works if app initialized?
-            // Wait, initializeApp needs config.
-            // I need to check where 'app' or 'db' variable comes from.
-            // Step 5095 showed 'const app = initializeApp(firebaseConfig);'
-            // I need to find that line.
-        }));
-        // Wait, I can't redefine db.
-        // I need to find where 'db' is defined.
+
 
 
 
