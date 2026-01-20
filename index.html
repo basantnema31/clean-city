@@ -818,521 +818,537 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@1.0.0"></script>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import * as firebaseDb from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import * as firebaseDb from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+    import * as firebaseAuth from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-        window.onerror = function (message, source, lineno, colno, error) {
-            console.error("Global Error Suppressed:", message, lineno);
-            // User Requested: Hide Frontend Errors
-            // if (window.showToast) showToast("Error: " + message, "error");
-        };
+    window.onerror = function (message, source, lineno, colno, error) {
+    console.error("Global Error Suppressed:", message, lineno);
+    // User Requested: Hide Frontend Errors
+    // if (window.showToast) showToast("Error: " + message, "error");
+    };
 
-        window.switchView = (viewName, navEl = null) => {
-            try {
-                document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
-                const target = document.getElementById(`view-${viewName}`);
-                if (target) {
-                    target.style.display = 'block';
-                } else {
-                    console.error("View not found:", viewName);
-                    return;
-                }
+    window.switchView = (viewName, navEl = null) => {
+    try {
+    document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
+    const target = document.getElementById(`view-${viewName}`);
+    if (target) {
+    target.style.display = 'block';
+    } else {
+    console.error("View not found:", viewName);
+    return;
+    }
 
-                if (viewName === 'profile') {
-                    document.body.classList.add('is-profile-view');
-                } else {
-                    document.body.classList.remove('is-profile-view');
-                }
+    if (viewName === 'profile') {
+    document.body.classList.add('is-profile-view');
+    } else {
+    document.body.classList.remove('is-profile-view');
+    }
 
-                if (navEl) {
-                    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-                    navEl.classList.add('active');
-                }
+    if (navEl) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    navEl.classList.add('active');
+    }
 
-                if (viewName === 'profile') {
-                    const fab = document.querySelector('.fab');
-                    if (fab) fab.style.display = 'none';
-                    try {
-                        populateProfileView();
-                    } catch (e) {
-                        console.error("Profile population error:", e);
-                    }
-                } else {
-                    const fab = document.querySelector('.fab');
-                    if (fab) fab.style.display = 'flex';
-                }
+    if (viewName === 'profile') {
+    const fab = document.querySelector('.fab');
+    if (fab) fab.style.display = 'none';
+    try {
+    populateProfileView();
+    } catch (e) {
+    console.error("Profile population error:", e);
+    }
+    } else {
+    const fab = document.querySelector('.fab');
+    if (fab) fab.style.display = 'flex';
+    }
 
-                if (viewName === 'map') {
-                    setTimeout(() => {
-                        if (map) {
-                            map.invalidateSize();
-                            if (currentLat && currentLng) {
-                                map.setView([currentLat, currentLng], 15);
-                            }
-                        }
-                    }, 200);
-                }
+    if (viewName === 'map') {
+    setTimeout(() => {
+    if (map) {
+    map.invalidateSize();
+    if (currentLat && currentLng) {
+    map.setView([currentLat, currentLng], 15);
+    }
+    }
+    }, 200);
+    }
 
-                if (viewName === 'report') {
-                    if (currentLat && currentLng) {
-                        const locStat = document.getElementById('loc-status');
-                        if (locStat) locStat.innerHTML = `<span style="color:green"><i class="fa-solid fa-check"></i> Location Auto-Detected</span>`;
-                    } else {
-                        const locStat = document.getElementById('loc-status');
-                        if (locStat) {
-                            locStat.innerHTML = `
-                                <span style="color:var(--text-light)"><i class="fa-solid fa-location-dot"></i> Detecting Location...</span>
-                                <button onclick="requestLocationValues()" class="btn" style="margin-left:10px; padding: 5px 10px; font-size: 0.8rem; width: auto; background: var(--primary);">
-                                    <i class="fa-solid fa-location-crosshairs"></i> Enable GPS
-                                </button>
-                             `;
-                        }
-                        requestLocationValues();
-                    }
-                }
+    if (viewName === 'report') {
+    if (currentLat && currentLng) {
+    const locStat = document.getElementById('loc-status');
+    if (locStat) locStat.innerHTML = `<span style="color:green"><i class="fa-solid fa-check"></i> Location
+        Auto-Detected</span>`;
+    } else {
+    const locStat = document.getElementById('loc-status');
+    if (locStat) {
+    locStat.innerHTML = `
+    <span style="color:var(--text-light)"><i class="fa-solid fa-location-dot"></i> Detecting Location...</span>
+    <button onclick="requestLocationValues()" class="btn"
+        style="margin-left:10px; padding: 5px 10px; font-size: 0.8rem; width: auto; background: var(--primary);">
+        <i class="fa-solid fa-location-crosshairs"></i> Enable GPS
+    </button>
+    `;
+    }
+    requestLocationValues();
+    }
+    }
 
-            } catch (err) {
-                alert("Nav Error: " + err.message);
-            }
-        };
+    } catch (err) {
+    alert("Nav Error: " + err.message);
+    }
+    };
 
-        function populateProfileView() {
-            if (typeof currentUserData === 'undefined' || !currentUserData) return;
+    function populateProfileView() {
+    if (typeof currentUserData === 'undefined' || !currentUserData) return;
 
-            document.getElementById('profile-name-display').innerText = currentUserData.name || 'Citizen';
-            document.getElementById('profile-email-display').innerText = currentUserData.email || '';
-            document.getElementById('profile-points').innerText = currentUserData.points || 0;
-            document.getElementById('profile-name-input').value = currentUserData.name || '';
+    document.getElementById('profile-name-display').innerText = currentUserData.name || 'Citizen';
+    document.getElementById('profile-email-display').innerText = currentUserData.email || '';
+    document.getElementById('profile-points').innerText = currentUserData.points || 0;
+    document.getElementById('profile-name-input').value = currentUserData.name || '';
 
-            const p = currentUserData.points || 0;
-            let rank = "Rookie";
-            if (p > 50) rank = "Scout";
-            if (p > 100) rank = "Ranger";
-            if (p > 500) rank = "Captain";
-            if (p > 1000) rank = "Hero";
-            document.getElementById('profile-rank').innerText = rank;
-        }
+    const p = currentUserData.points || 0;
+    let rank = "Rookie";
+    if (p > 50) rank = "Scout";
+    if (p > 100) rank = "Ranger";
+    if (p > 500) rank = "Captain";
+    if (p > 1000) rank = "Hero";
+    document.getElementById('profile-rank').innerText = rank;
+    }
 
-        window.updateProfileName = () => {
-            const newName = document.getElementById('profile-name-input').value;
-            if (!newName) return showToast("Please enter a name", "error");
+    window.updateProfileName = () => {
+    const newName = document.getElementById('profile-name-input').value;
+    if (!newName) return showToast("Please enter a name", "error");
 
-            if (typeof currentUserUid !== 'undefined' && currentUserUid) {
-                set(ref(db, `users/${currentUserUid}/name`), newName)
-                    .then(() => {
-                        showToast("Name Updated Successfully!", "success");
-
-
-                        document.getElementById('profile-name-display').innerText = newName;
-                        if (document.getElementById('user-display')) document.getElementById('user-display').innerText = `Hi, ${newName}`;
-
-                        let user = JSON.parse(localStorage.getItem('user') || '{}');
-                        user.name = newName;
-                        localStorage.setItem('user', JSON.stringify(user));
+    if (typeof currentUserUid !== 'undefined' && currentUserUid) {
+    set(ref(db, `users/${currentUserUid}/name`), newName)
+    .then(() => {
+    showToast("Name Updated Successfully!", "success");
 
 
-                        loadLeaderboard();
-                    })
-                    .catch(e => showToast(e.message, "error"));
-            } else {
-                showToast("Error: User not authenticated properly.", "error");
-            }
-        }
+    document.getElementById('profile-name-display').innerText = newName;
+    if (document.getElementById('user-display')) document.getElementById('user-display').innerText = `Hi, ${newName}`;
 
-        window.showToast = (message, type = 'info') => {
-            if (type === 'error' && (message.includes('ReferenceError') || message.includes('firebase') || message.includes('defined'))) {
-                console.warn("Toast Suppressed:", message);
-                return;
-            }
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-
-            let icon = 'fa-info-circle';
-            if (type === 'success') icon = 'fa-check-circle';
-            if (type === 'error') icon = 'fa-exclamation-triangle';
-
-            toast.innerHTML = `
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <i class="fa-solid ${icon}" style="color:${type === 'success' ? 'var(--success)' : (type === 'error' ? 'var(--danger)' : 'var(--primary)')}"></i>
-                    <span>${message}</span>
-                </div>
-                <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
-            `;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.animation = 'fadeOut 0.3s ease forwards';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        };
-        window.showReportView = () => switchView('report');
+    let user = JSON.parse(localStorage.getItem('user') || '{}');
+    user.name = newName;
+    localStorage.setItem('user', JSON.stringify(user));
 
 
+    loadLeaderboard();
+    })
+    .catch(e => showToast(e.message, "error"));
+    } else {
+    showToast("Error: User not authenticated properly.", "error");
+    }
+    }
 
-        let currentImageFile = null;
-        let currentLat = null;
-        let currentLng = null;
-        let map = null;
-        let currentUserData = null;
-        let currentUserUid = null;
+    window.showToast = (message, type = 'info') => {
+    if (type === 'error' && (message.includes('ReferenceError') || message.includes('firebase') ||
+    message.includes('defined'))) {
+    console.warn("Toast Suppressed:", message);
+    return;
+    }
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+
+    let icon = 'fa-info-circle';
+    if (type === 'success') icon = 'fa-check-circle';
+    if (type === 'error') icon = 'fa-exclamation-triangle';
+
+    toast.innerHTML = `
+    <div style="display:flex; align-items:center; gap:10px;">
+        <i class="fa-solid ${icon}"
+            style="color:${type === 'success' ? 'var(--success)' : (type === 'error' ? 'var(--danger)' : 'var(--primary)')}"></i>
+        <span>${message}</span>
+    </div>
+    <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => {
+    toast.style.animation = 'fadeOut 0.3s ease forwards';
+    setTimeout(() => toast.remove(), 300);
+    }, 3000);
+    };
+    window.showReportView = () => switchView('report');
 
 
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyC4OeHd1iqPFSS2OtyWNy6DXgGhNmMbk54",
-            authDomain: "web-app-8edcb.firebaseapp.com",
-            databaseURL: "https://web-app-8edcb-default-rtdb.firebaseio.com",
-            projectId: "web-app-8edcb",
-            storageBucket: "web-app-8edcb.firebasestorage.app",
-            messagingSenderId: "23560015388",
-            appId: "1:23560015388:web:39bc4d9ca858975f62d9d9"
-        };
-        const IMGBB_API_KEY = "eef75a5e0bc4f6786b78d13a0bdeabf9";
-
-        let app, db;
-        try {
-            app = initializeApp(firebaseConfig);
-            db = firebaseDb.getDatabase(app);
-        } catch (e) { console.error(e); }
+    let currentImageFile = null;
+    let currentLat = null;
+    let currentLng = null;
+    let map = null;
+    let currentUserData = null;
+    let currentUserUid = null;
 
 
 
+    const firebaseConfig = {
+    apiKey: "AIzaSyC4OeHd1iqPFSS2OtyWNy6DXgGhNmMbk54",
+    authDomain: "web-app-8edcb.firebaseapp.com",
+    databaseURL: "https://web-app-8edcb-default-rtdb.firebaseio.com",
+    projectId: "web-app-8edcb",
+    storageBucket: "web-app-8edcb.firebasestorage.app",
+    messagingSenderId: "23560015388",
+    appId: "1:23560015388:web:39bc4d9ca858975f62d9d9"
+    };
+    const IMGBB_API_KEY = "eef75a5e0bc4f6786b78d13a0bdeabf9";
+
+    let app, db, auth;
+    try {
+    app = initializeApp(firebaseConfig);
+    db = firebaseDb.getDatabase(app);
+    auth = firebaseAuth.getAuth(app);
+    } catch (e) { console.error(e); }
 
 
-        window.toggleTheme = () => {
-            const html = document.documentElement;
-            const mainIcon = document.getElementById('theme-icon');
-            const authIcon = document.getElementById('auth-theme-icon');
 
-            if (html.getAttribute('data-theme') === 'dark') {
-                html.removeAttribute('data-theme');
-                document.body.removeAttribute('data-theme');
-                if (mainIcon) mainIcon.classList.replace('fa-sun', 'fa-moon');
-                if (authIcon) authIcon.classList.replace('fa-sun', 'fa-moon');
-                localStorage.setItem('theme', 'light');
-            } else {
-                html.setAttribute('data-theme', 'dark');
-                if (mainIcon) mainIcon.classList.replace('fa-moon', 'fa-sun');
-                if (authIcon) authIcon.classList.replace('fa-moon', 'fa-sun');
-                localStorage.setItem('theme', 'dark');
-            }
-        }
 
-        if (localStorage.getItem('theme') === 'dark') {
-            document.getElementById('theme-icon')?.classList.replace('fa-moon', 'fa-sun');
-            document.getElementById('auth-theme-icon')?.classList.replace('fa-moon', 'fa-sun');
-        }
 
-        window.toggleAuthMode = () => {
-            const login = document.getElementById('login-card');
-            const reg = document.getElementById('register-card');
+    window.toggleTheme = () => {
+    const html = document.documentElement;
+    const mainIcon = document.getElementById('theme-icon');
+    const authIcon = document.getElementById('auth-theme-icon');
 
-            if (login.style.display === 'none') {
-                login.style.display = 'block';
-                reg.style.display = 'none';
-            } else {
-                login.style.display = 'none';
-                reg.style.display = 'block';
-            }
-        }
+    if (html.getAttribute('data-theme') === 'dark') {
+    html.removeAttribute('data-theme');
+    document.body.removeAttribute('data-theme');
+    if (mainIcon) mainIcon.classList.replace('fa-sun', 'fa-moon');
+    if (authIcon) authIcon.classList.replace('fa-sun', 'fa-moon');
+    localStorage.setItem('theme', 'light');
+    } else {
+    html.setAttribute('data-theme', 'dark');
+    if (mainIcon) mainIcon.classList.replace('fa-moon', 'fa-sun');
+    if (authIcon) authIcon.classList.replace('fa-moon', 'fa-sun');
+    localStorage.setItem('theme', 'dark');
+    }
+    }
 
-        window.handleLogin = () => {
-            const email = document.getElementById('login-email').value;
-            const pass = document.getElementById('login-pass').value;
-            if (!email || !pass) {
-                showToast("Please enter both email and password.", "error");
-                return;
-            }
+    if (localStorage.getItem('theme') === 'dark') {
+    document.getElementById('theme-icon')?.classList.replace('fa-moon', 'fa-sun');
+    document.getElementById('auth-theme-icon')?.classList.replace('fa-moon', 'fa-sun');
+    }
 
-            const btn = document.querySelector('#login-card .btn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking...';
-            btn.disabled = true;
+    window.toggleAuthMode = () => {
+    const login = document.getElementById('login-card');
+    const reg = document.getElementById('register-card');
 
-            try {
-                const userId = email.replace(/\./g, '_');
-                const userRef = ref(db, 'users/' + userId);
+    if (login.style.display === 'none') {
+    login.style.display = 'block';
+    reg.style.display = 'none';
+    } else {
+    login.style.display = 'none';
+    reg.style.display = 'block';
+    }
+    }
 
-                onValue(userRef, (snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        if (data.password === pass) {
-                            loginSuccess(data);
-                        } else {
-                            showToast("Incorrect Password!", "error");
-                            btn.innerHTML = originalText;
-                            btn.disabled = false;
-                        }
-                    } else {
-                        showToast("User not found! Please create an account first.", "error");
-                        btn.innerHTML = originalText;
-                        btn.disabled = false;
-                    }
-                }, { onlyOnce: true });
-            } catch (error) {
-                console.error(error);
-                showToast("Login Error: " + error.message, "error");
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        };
+    window.handleLogin = () => {
+    const email = document.getElementById('login-email').value;
+    const pass = document.getElementById('login-pass').value;
+    if (!email || !pass) return showToast("Please enter email & password", "error");
 
-        window.handleSignup = () => {
-            const name = document.getElementById('reg-name').value;
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-pass').value;
+    const btn = document.querySelector('#login-card .btn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing In...';
+    btn.disabled = true;
 
-            if (!name || !email || !pass) {
-                showToast("Please fill in all fields.", "error");
-                return;
-            }
+    firebaseAuth.signInWithEmailAndPassword(auth, email, pass)
+    .then((userCredential) => {
+    // Signed in
+    const user = userCredential.user;
+    // Fetch user data from Realtime Database
+    const userId = user.email.replace(/\./g, '_');
+    firebaseDb.get(firebaseDb.ref(db, 'users/' + userId)).then(snapshot => {
+    if (snapshot.exists()) {
+    loginSuccess(snapshot.val());
+    } else {
+    showToast("User data not found in DB. Please contact support.", "error");
+    firebaseAuth.signOut(auth); // Log out if DB data is missing
+    }
+    });
+    })
+    .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    console.error("Login Error:", errorCode, errorMessage);
+    showToast("Login Failed: " + errorMessage, "error");
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+    });
+    };
 
-            const btn = document.querySelector('#register-card .btn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
-            btn.disabled = true;
+    window.handleSignup = () => {
+    const name = document.getElementById('reg-name').value;
+    const email = document.getElementById('reg-email').value;
+    const pass = document.getElementById('reg-pass').value;
 
-            try {
-                if (!db) {
-                    alert("System Error: Database not connected. Please reload.");
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    return;
-                }
+    if (!name || !email || !pass) {
+    showToast("Please fill in all fields.", "error");
+    return;
+    }
+    if (pass.length < 6) return showToast("Password must be 6+ chars", "error" ); const
+        btn=document.querySelector('#register-card .btn'); const originalText=btn.innerHTML;
+        btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Creating Account...' ; btn.disabled=true;
+        firebaseAuth.createUserWithEmailAndPassword(auth, email, pass) .then((userCredential)=> {
+        const user = userCredential.user;
 
-                const userId = email.replace(/\./g, '_');
-                const userRef = ref(db, 'users/' + userId);
-
-                const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 10000));
-
-                Promise.race([get(userRef), timeout]).then((snapshot) => {
-                    if (snapshot.exists()) {
-                        showToast("Account already exists! Please Sign In.", "error");
-                        btn.innerHTML = originalText;
-                        btn.disabled = false;
-                    } else {
-                        const newUser = { name: name, email: email, password: pass, points: 0, reports: 0 };
-                        set(userRef, newUser).then(() => {
-                            showToast("Account Created! Success.", "success");
-                            loginSuccess(newUser);
-                        }).catch(err => {
-                            console.error(err);
-                            showToast("Error creating account: " + err.message, "error");
-                            btn.innerHTML = originalText;
-                            btn.disabled = false;
-                        });
-                    }
-                }).catch(err => {
-                    console.error("Database check failed", err);
-                    showToast("Connection Error: " + err.message, "error");
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                });
-            } catch (error) {
-                console.error(error);
-                showToast("Signup Error: " + error.message, "error");
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
+        // Create User Profile in DB
+        const userId = email.replace(/\./g, '_');
+        firebaseDb.set(firebaseDb.ref(db, 'users/' + userId), {
+        name: name,
+        email: email,
+        // password: pass, // In prod, do not save pass
+        points: 0,
+        reports: 0,
+        joined: Date.now()
+        }).then(() => {
+        showToast("Account Created! Success.", "success");
+        loginSuccess({ name, email, points: 0, reports: 0, joined: Date.now() }); // Pass initial data
+        }).catch(err => {
+        console.error("DB Set Error:", err);
+        showToast("Error saving user data: " + err.message, "error");
+        firebaseAuth.signOut(auth); // Log out if DB write fails
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        });
+        })
+        .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error("Signup Error:", errorCode, errorMessage);
+        showToast("Signup Failed: " + errorMessage, "error");
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        });
         };
 
         function loginSuccess(user) {
-            localStorage.setItem('user', JSON.stringify(user));
-            currentUserUid = user.email.replace(/\./g, '_');
+        localStorage.setItem('user', JSON.stringify(user));
+        currentUserUid = user.email.replace(/\./g, '_');
 
-            document.getElementById('auth-container').style.display = 'none';
-            document.getElementById('app-container').style.display = 'block';
-            document.getElementById('app-header').style.display = 'flex';
-            document.getElementById('user-display').innerText = `Hi, ${user.name}`;
+        document.getElementById('auth-container').style.display = 'none';
+        document.getElementById('app-container').style.display = 'block';
+        document.getElementById('app-header').style.display = 'flex';
+        document.getElementById('user-display').innerText = `Hi, ${user.name}`;
 
-            initMap();
-            loadUserData(user.email);
-            loadLeaderboard();
+        initMap();
+        loadUserData(user.email);
+        loadLeaderboard();
 
 
-            setTimeout(() => {
-                if (window.checkTerms) window.checkTerms(user);
-            }, 500);
+        setTimeout(() => {
+        if (window.checkTerms) window.checkTerms(user);
+        }, 500);
         }
 
         window.logout = () => {
-            if (confirm("Are you sure you want to logout?")) {
-                localStorage.removeItem('user');
-                localStorage.removeItem('userAuth');
-                location.reload();
-            }
+        if (confirm("Are you sure you want to logout?")) {
+        firebaseAuth.signOut(auth).then(() => {
+        showToast("Logged Out Successfully", "success");
+        localStorage.removeItem('user');
+        location.reload();
+        }).catch((error) => {
+        showToast("Error: " + error.message, "error");
+        });
+        }
         }
 
-        const savedUser = localStorage.getItem('user');
-        if (savedUser) {
-            loginSuccess(JSON.parse(savedUser));
+        firebaseAuth.onAuthStateChanged(auth, (user) => {
+        if (user) {
+        // User is signed in
+        const userId = user.email.replace(/\./g, '_');
+        firebaseDb.get(firebaseDb.ref(db, 'users/' + userId)).then(snapshot => {
+        if (snapshot.exists()) {
+        loginSuccess(snapshot.val());
         } else {
-            document.getElementById('auth-container').style.display = 'flex';
+        // User authenticated with Firebase Auth but no data in Realtime DB
+        // This might happen if user was created via Auth but DB write failed, or external creation
+        showToast("User data missing. Please contact support.", "error");
+        firebaseAuth.signOut(auth);
         }
+        });
+        } else {
+        // User is signed out
+        document.getElementById('auth-container').style.display = 'flex';
+        document.getElementById('app-container').style.display = 'none';
+        document.getElementById('app-header').style.display = 'none';
+        localStorage.removeItem('user');
+        }
+        });
+
+        // The following block is now redundant because onAuthStateChanged handles initial state
+        // const savedUser = localStorage.getItem('user');
+        // if (savedUser) {
+        // loginSuccess(JSON.parse(savedUser));
+        // } else {
+        // document.getElementById('auth-container').style.display = 'flex';
+        // }
 
         window.showReportView = () => switchView('report');
 
         let aiModel = null;
         (async function () {
-            try {
-                console.log("Loading AI...");
-                aiModel = await mobilenet.load();
-                console.log("AI Ready");
-            } catch (e) {
-                console.error("AI Load Failed", e);
-            }
+        try {
+        console.log("Loading AI...");
+        aiModel = await mobilenet.load();
+        console.log("AI Ready");
+        } catch (e) {
+        console.error("AI Load Failed", e);
+        }
         })();
 
         window.removeImage = () => {
-            currentImageFile = null;
-            if (document.getElementById('file-cam')) document.getElementById('file-cam').value = "";
-            if (document.getElementById('file-gallery')) document.getElementById('file-gallery').value = "";
+        currentImageFile = null;
+        if (document.getElementById('file-cam')) document.getElementById('file-cam').value = "";
+        if (document.getElementById('file-gallery')) document.getElementById('file-gallery').value = "";
 
-            document.getElementById('preview-container').style.display = 'none';
-            document.getElementById('image-preview').src = "";
-            document.getElementById('upload-area').style.display = 'block';
-            document.getElementById('ai-result').style.display = 'none';
+        document.getElementById('preview-container').style.display = 'none';
+        document.getElementById('image-preview').src = "";
+        document.getElementById('upload-area').style.display = 'block';
+        document.getElementById('ai-result').style.display = 'none';
         }
 
         window.processImageFile = (file) => {
-            if (!file) return;
-            currentImageFile = file;
-            const container = document.getElementById('preview-container');
-            const img = document.getElementById('image-preview');
-            const uploadArea = document.getElementById('upload-area');
-            const aiRes = document.getElementById('ai-result');
+        if (!file) return;
+        currentImageFile = file;
+        const container = document.getElementById('preview-container');
+        const img = document.getElementById('image-preview');
+        const uploadArea = document.getElementById('upload-area');
+        const aiRes = document.getElementById('ai-result');
 
-            uploadArea.style.display = 'none';
-            aiRes.style.display = 'none';
-            container.style.display = 'flex';
-
-
-            if (file.type.startsWith('video/')) {
-
-                const videoUrl = URL.createObjectURL(file);
+        uploadArea.style.display = 'none';
+        aiRes.style.display = 'none';
+        container.style.display = 'flex';
 
 
-                const tempVideo = document.createElement('video');
-                tempVideo.src = videoUrl;
-                tempVideo.muted = true;
-                tempVideo.playsInline = true;
-                tempVideo.currentTime = 1;
+        if (file.type.startsWith('video/')) {
 
-                tempVideo.onloadeddata = () => {
-                };
+        const videoUrl = URL.createObjectURL(file);
 
-                tempVideo.onseeked = () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = tempVideo.videoWidth;
-                    canvas.height = tempVideo.videoHeight;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(tempVideo, 0, 0, canvas.width, canvas.height);
 
-                    img.src = canvas.toDataURL('image/jpeg');
+        const tempVideo = document.createElement('video');
+        tempVideo.src = videoUrl;
+        tempVideo.muted = true;
+        tempVideo.playsInline = true;
+        tempVideo.currentTime = 1;
 
-                    canvas.toBlob(blob => {
-                        const thumbFile = new File([blob], "video_thumb.jpg", { type: "image/jpeg" });
-                        currentImageFile = thumbFile;
+        tempVideo.onloadeddata = () => {
+        };
 
-                        runAIAnalysis(img);
+        tempVideo.onseeked = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = tempVideo.videoWidth;
+        canvas.height = tempVideo.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(tempVideo, 0, 0, canvas.width, canvas.height);
 
-                        showToast("Video selected! Using frame for analysis.", "info");
-                    }, 'image/jpeg', 0.9);
-                };
+        img.src = canvas.toDataURL('image/jpeg');
 
-                tempVideo.preload = 'metadata';
-                setTimeout(() => { tempVideo.currentTime = 0.5; }, 200);
+        canvas.toBlob(blob => {
+        const thumbFile = new File([blob], "video_thumb.jpg", { type: "image/jpeg" });
+        currentImageFile = thumbFile;
 
-            } else {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    img.src = e.target.result;
-                    runAIAnalysis(img);
-                };
-                reader.readAsDataURL(file);
-            }
+        runAIAnalysis(img);
+
+        showToast("Video selected! Using frame for analysis.", "info");
+        }, 'image/jpeg', 0.9);
+        };
+
+        tempVideo.preload = 'metadata';
+        setTimeout(() => { tempVideo.currentTime = 0.5; }, 200);
+
+        } else {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+        img.src = e.target.result;
+        runAIAnalysis(img);
+        };
+        reader.readAsDataURL(file);
+        }
         };
 
         window.runAIAnalysis = (imgElement) => {
-            const aiRes = document.getElementById('ai-result');
+        const aiRes = document.getElementById('ai-result');
 
-            if (aiModel) {
-                aiRes.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing...';
-                aiRes.style.display = 'block';
+        if (aiModel) {
+        aiRes.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing...';
+        aiRes.style.display = 'block';
 
-                setTimeout(async () => {
-                    try {
-                        const predictions = await aiModel.classify(imgElement);
+        setTimeout(async () => {
+        try {
+        const predictions = await aiModel.classify(imgElement);
 
-                        const wasteKeywords = [
-                            'bottle', 'can', 'plastic', 'paper', 'trash', 'waste', 'garbage', 'rubbish',
-                            'carton', 'cup', 'glass', 'metal', 'bag', 'box', 'tissue', 'wrapper',
-                            'container', 'bin', 'street', 'ashcan', 'junk', 'litter', 'debris', 'packet',
-                            'bucket', 'barrel', 'basket', 'crate', 'tub', 'pot', 'vessel', 'urn',
-                            'puzzle', 'jigsaw', 'rock', 'stone', 'mountain', 'hill', 'sack', 'textile',
-                            'foam', 'styrofoam', 'cup', 'mug', 'coffee', 'espresso', 'cappuccino', 'latte',
-                            'straw', 'lid', 'disposable', 'takeout', 'leftover', 'food', 'plate', 'dish', 'tray',
-                            'cardboard', 'packaging', 'mail', 'envelope', 'courier', 'parcel',
-                            'sidewalk', 'pavement'
-                        ];
+        const wasteKeywords = [
+        'bottle', 'can', 'plastic', 'paper', 'trash', 'waste', 'garbage', 'rubbish',
+        'carton', 'cup', 'glass', 'metal', 'bag', 'box', 'tissue', 'wrapper',
+        'container', 'bin', 'street', 'ashcan', 'junk', 'litter', 'debris', 'packet',
+        'bucket', 'barrel', 'basket', 'crate', 'tub', 'pot', 'vessel', 'urn',
+        'puzzle', 'jigsaw', 'rock', 'stone', 'mountain', 'hill', 'sack', 'textile',
+        'foam', 'styrofoam', 'cup', 'mug', 'coffee', 'espresso', 'cappuccino', 'latte',
+        'straw', 'lid', 'disposable', 'takeout', 'leftover', 'food', 'plate', 'dish', 'tray',
+        'cardboard', 'packaging', 'mail', 'envelope', 'courier', 'parcel',
+        'sidewalk', 'pavement'
+        ];
 
-                        const topN = predictions.slice(0, 5);
+        const topN = predictions.slice(0, 5);
 
-                        const subBtn = document.getElementById('submit-btn');
-                        subBtn.disabled = false;
-                        subBtn.style.opacity = "1";
-                        subBtn.style.cursor = "pointer";
-                        subBtn.classList.add('btn-glow');
-                        subBtn.innerHTML = "SUBMIT REPORT <i class='fa-solid fa-paper-plane'></i>";
+        const subBtn = document.getElementById('submit-btn');
+        subBtn.disabled = false;
+        subBtn.style.opacity = "1";
+        subBtn.style.cursor = "pointer";
+        subBtn.classList.add('btn-glow');
+        subBtn.innerHTML = "SUBMIT REPORT <i class='fa-solid fa-paper-plane'></i>";
 
-                        const isWaste = topN.some(p =>
-                            wasteKeywords.some(k => new RegExp(`\\b${k}\\b`, 'i').test(p.className))
-                        );
+        const isWaste = topN.some(p =>
+        wasteKeywords.some(k => new RegExp(`\\b${k}\\b`, 'i').test(p.className))
+        );
 
-                        const topName = topN[0].className.split(',')[0];
+        const topName = topN[0].className.split(',')[0];
 
-                        aiRes.innerHTML = `<small>Detected:</small> <div id="final-res" style="font-weight:bold; font-size:1.1rem; margin-top:5px;"></div>`;
-                        const resDiv = document.getElementById('final-res');
+        aiRes.innerHTML = `<small>Detected:</small>
+        <div id="final-res" style="font-weight:bold; font-size:1.1rem; margin-top:5px;"></div>`;
+        const resDiv = document.getElementById('final-res');
 
-                        if (isWaste) {
-                            const match = topN.find(p => wasteKeywords.some(k => p.className.toLowerCase().includes(k)));
-                            const displayName = match ? match.className.split(',')[0] : topName;
+        if (isWaste) {
+        const match = topN.find(p => wasteKeywords.some(k => p.className.toLowerCase().includes(k)));
+        const displayName = match ? match.className.split(',')[0] : topName;
 
-                            resDiv.innerText = `✅ ${displayName}`;
-                            resDiv.style.color = 'var(--success)';
-                            resDiv.dataset.val = displayName;
-                            document.getElementById('submit-btn').disabled = false;
-                        } else {
-                            resDiv.innerHTML = `
-                                ⚠️ <b>Not Garbage</b><br>
-                                <small style="color: #666;">(AI saw: ${topName})</small>
-                                <br>
-                                <button class="btn btn-outline" style="margin-top: 10px; width: 100%; border: 1px solid var(--primary); color: var(--primary); background: transparent;" onclick="forceSubmit('${topName}')">
-                                    Mistake? Report Anyway
-                                </button>
-                            `;
-                            resDiv.style.color = 'orange';
-                            resDiv.dataset.val = 'Unknown Object';
-                        }
-                    } catch (err) {
-                        console.error(err);
-                        aiRes.innerText = "AI Error: " + err.message;
-                    }
-                }, 500);
+        resDiv.innerText = `✅ ${displayName}`;
+        resDiv.style.color = 'var(--success)';
+        resDiv.dataset.val = displayName;
+        document.getElementById('submit-btn').disabled = false;
+        } else {
+        resDiv.innerHTML = `
+        ⚠️ <b>Not Garbage</b><br>
+        <small style="color: #666;">(AI saw: ${topName})</small>
+        <br>
+        <button class="btn btn-outline"
+            style="margin-top: 10px; width: 100%; border: 1px solid var(--primary); color: var(--primary); background: transparent;"
+            onclick="forceSubmit('${topName}')">
+            Mistake? Report Anyway
+        </button>
+        `;
+        resDiv.style.color = 'orange';
+        resDiv.dataset.val = 'Unknown Object';
+        }
+        } catch (err) {
+        console.error(err);
+        aiRes.innerText = "AI Error: " + err.message;
+        }
+        }, 500);
 
-            } else {
-                // Retry if model not loaded
-                aiRes.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading AI Model...';
-                aiRes.style.display = 'block';
-                setTimeout(() => window.runAIAnalysis(imgElement), 500);
-            }
+        } else {
+        // Retry if model not loaded
+        aiRes.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading AI Model...';
+        aiRes.style.display = 'block';
+        setTimeout(() => window.runAIAnalysis(imgElement), 500);
+        }
         }
 
         window.handleFileSelect = (input) => {
-            if (input.files && input.files[0]) {
-                processImageFile(input.files[0]);
-            }
+        if (input.files && input.files[0]) {
+        processImageFile(input.files[0]);
+        }
         }
 
         let cameraStream = null;
@@ -1340,150 +1356,145 @@
         let currentDeviceIdx = 0;
 
         async function initCameras() {
-            try {
-                await navigator.mediaDevices.getUserMedia({ video: true });
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                videoDevices = devices.filter(d => d.kind === 'videoinput');
+        try {
+        await navigator.mediaDevices.getUserMedia({ video: true });
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        videoDevices = devices.filter(d => d.kind === 'videoinput');
 
-                const backCameras = videoDevices.filter(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('rear') || d.label.toLowerCase().includes('environment'));
-                if (backCameras.length > 0) {
-                    videoDevices = backCameras;
-                    currentDeviceIdx = videoDevices.length - 1;
-                }
-            } catch (e) {
-                console.warn("Camera enumeration failed", e);
-            }
+        const backCameras = videoDevices.filter(d => d.label.toLowerCase().includes('back') ||
+        d.label.toLowerCase().includes('rear') || d.label.toLowerCase().includes('environment'));
+        if (backCameras.length > 0) {
+        videoDevices = backCameras;
+        currentDeviceIdx = videoDevices.length - 1;
+        }
+        } catch (e) {
+        console.warn("Camera enumeration failed", e);
+        }
         }
 
         window.startCamera = async () => {
-            const modal = document.getElementById('camera-modal');
-            const video = document.getElementById('camera-stream');
+        const modal = document.getElementById('camera-modal');
+        const video = document.getElementById('camera-stream');
 
-            if (videoDevices.length === 0) await initCameras();
+        if (videoDevices.length === 0) await initCameras();
 
-            const deviceId = videoDevices[currentDeviceIdx] ? { exact: videoDevices[currentDeviceIdx].deviceId } : undefined;
+        const deviceId = videoDevices[currentDeviceIdx] ? { exact: videoDevices[currentDeviceIdx].deviceId } :
+        undefined;
 
-            const constraints = {
-                video: {
-                    deviceId: deviceId,
-                    facingMode: deviceId ? undefined : 'environment',
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 }
-                }
-            };
+        const constraints = {
+        video: {
+        deviceId: deviceId,
+        facingMode: deviceId ? undefined : 'environment',
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+        }
+        };
 
-            try {
-                if (cameraStream) {
-                    cameraStream.getTracks().forEach(t => t.stop());
-                }
-                cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
-                video.srcObject = cameraStream;
-                modal.style.display = 'flex';
-            } catch (err) {
-                console.error("Camera Access Error:", err);
-                try {
-                    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                    video.srcObject = cameraStream;
-                    modal.style.display = 'flex';
-                } catch (err2) {
-                    showToast("Camera access failed. Using File Picker.", "error");
-                    document.getElementById('file-cam').click();
-                }
-            }
+        try {
+        if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+        }
+        cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = cameraStream;
+        modal.style.display = 'flex';
+        } catch (err) {
+        console.error("Camera Access Error:", err);
+        try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        video.srcObject = cameraStream;
+        modal.style.display = 'flex';
+        } catch (err2) {
+        showToast("Camera access failed. Using File Picker.", "error");
+        document.getElementById('file-cam').click();
+        }
+        }
         };
 
         window.switchLens = () => {
-            if (videoDevices.length < 2) {
-                showToast("No other cameras found.", "info");
-                return;
-            }
-            currentDeviceIdx = (currentDeviceIdx + 1) % videoDevices.length;
-            startCamera();
-        }
-
-        window.closeCamera = () => {
+        if (videoDevices.length < 2) { showToast("No other cameras found.", "info" ); return; }
+            currentDeviceIdx=(currentDeviceIdx + 1) % videoDevices.length; startCamera(); } window.closeCamera=()=> {
             const modal = document.getElementById('camera-modal');
             modal.style.display = 'none';
             if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-                cameraStream = null;
+            cameraStream.getTracks().forEach(track => track.stop());
+            cameraStream = null;
             }
-        };
+            };
 
-        let isVideoMode = false;
-        let mediaRecorder = null;
-        let recordedChunks = [];
-        let isRecording = false;
+            let isVideoMode = false;
+            let mediaRecorder = null;
+            let recordedChunks = [];
+            let isRecording = false;
 
-        window.switchCameraMode = (mode) => {
+            window.switchCameraMode = (mode) => {
             isVideoMode = (mode === 'video');
             const photoBtn = document.getElementById('mode-photo');
             const videoBtn = document.getElementById('mode-video');
             const capBtn = document.getElementById('capture-btn');
 
             if (isVideoMode) {
-                photoBtn.style.background = 'transparent'; photoBtn.style.color = 'white';
-                videoBtn.style.background = 'white'; videoBtn.style.color = 'black';
-                capBtn.style.background = '#ff4d4d';
+            photoBtn.style.background = 'transparent'; photoBtn.style.color = 'white';
+            videoBtn.style.background = 'white'; videoBtn.style.color = 'black';
+            capBtn.style.background = '#ff4d4d';
             } else {
-                photoBtn.style.background = 'white'; photoBtn.style.color = 'black';
-                videoBtn.style.background = 'transparent'; videoBtn.style.color = 'white';
-                capBtn.style.background = 'white';
-                capBtn.style.borderRadius = '50%';
+            photoBtn.style.background = 'white'; photoBtn.style.color = 'black';
+            videoBtn.style.background = 'transparent'; videoBtn.style.color = 'white';
+            capBtn.style.background = 'white';
+            capBtn.style.borderRadius = '50%';
             }
-        };
+            };
 
-        window.handleCaptureClick = () => {
+            window.handleCaptureClick = () => {
             if (isVideoMode) {
-                toggleRecording();
+            toggleRecording();
             } else {
-                capturePhoto();
+            capturePhoto();
             }
-        };
+            };
 
-        window.toggleRecording = () => {
+            window.toggleRecording = () => {
             const btn = document.getElementById('capture-btn');
             const ind = document.getElementById('recording-indicator');
 
             if (!mediaRecorder) {
-                try {
-                    const stream = document.getElementById('camera-stream').srcObject;
-                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
-                    recordedChunks = [];
+            try {
+            const stream = document.getElementById('camera-stream').srcObject;
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+            recordedChunks = [];
 
-                    mediaRecorder.ondataavailable = (event) => {
-                        if (event.data.size > 0) {
-                            recordedChunks.push(event.data);
-                        }
-                    };
-
-                    mediaRecorder.start();
-                    isRecording = true;
-                    ind.style.display = 'block';
-                    btn.style.borderRadius = '10px';
-                    btn.style.transform = 'scale(0.8)';
-                } catch (e) {
-                    showToast("Recording not supported: " + e.message, "error");
-                }
-            } else {
-                mediaRecorder.stop();
-                isRecording = false;
-                ind.style.display = 'none';
-                btn.style.borderRadius = '50%';
-                btn.style.transform = 'scale(1)';
+            mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+            recordedChunks.push(event.data);
             }
-        };
+            };
 
-        window.saveVideo = () => {
+            mediaRecorder.start();
+            isRecording = true;
+            ind.style.display = 'block';
+            btn.style.borderRadius = '10px';
+            btn.style.transform = 'scale(0.8)';
+            } catch (e) {
+            showToast("Recording not supported: " + e.message, "error");
+            }
+            } else {
+            mediaRecorder.stop();
+            isRecording = false;
+            ind.style.display = 'none';
+            btn.style.borderRadius = '50%';
+            btn.style.transform = 'scale(1)';
+            }
+            };
+
+            window.saveVideo = () => {
             const blob = new Blob(recordedChunks, {
-                type: "video/webm"
+            type: "video/webm"
             });
             const file = new File([blob], "video_clip.webm", { type: "video/webm" });
             processImageFile(file);
             closeCamera();
-        };
+            };
 
-        window.capturePhoto = () => {
+            window.capturePhoto = () => {
             const video = document.getElementById('camera-stream');
             const canvas = document.getElementById('camera-canvas');
             canvas.width = video.videoWidth;
@@ -1491,13 +1502,13 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             canvas.toBlob((blob) => {
-                const file = new File([blob], "camera_capture.jpg", { type: "image/jpeg" });
-                processImageFile(file);
-                closeCamera();
+            const file = new File([blob], "camera_capture.jpg", { type: "image/jpeg" });
+            processImageFile(file);
+            closeCamera();
             }, 'image/jpeg', 0.9);
-        };
+            };
 
-        window.handleZoom = (val) => {
+            window.handleZoom = (val) => {
             const video = document.getElementById('camera-stream');
             if (!cameraStream) return;
 
@@ -1505,25 +1516,25 @@
             const capabilities = track.getCapabilities ? track.getCapabilities() : {};
 
             if (capabilities.zoom) {
-                track.applyConstraints({ advanced: [{ zoom: parseFloat(val) }] })
-                    .catch(e => console.log("Zoom error:", e));
+            track.applyConstraints({ advanced: [{ zoom: parseFloat(val) }] })
+            .catch(e => console.log("Zoom error:", e));
             } else {
-                video.style.transform = `scale(${val})`;
+            video.style.transform = `scale(${val})`;
             }
-        }
+            }
 
-        window.forceSubmit = (detected) => {
+            window.forceSubmit = (detected) => {
             const resDiv = document.getElementById('final-res');
             resDiv.innerText = `âœ… Garbage (Manual)`;
             resDiv.style.color = 'var(--success)';
             resDiv.dataset.val = "Manual Override (" + detected + ")";
             document.getElementById('submit-btn').disabled = false;
-        }
+            }
 
-        // SOCIAL SHARE LOGIC
-        window.generatedBlob = null;
+            // SOCIAL SHARE LOGIC
+            window.generatedBlob = null;
 
-        window.openShareModal = (imageSrc, lat, lng) => {
+            window.openShareModal = (imageSrc, lat, lng) => {
             const modal = document.getElementById('share-modal');
             const preview = document.getElementById('share-card-preview');
             const canvas = document.getElementById('share-canvas');
@@ -1540,108 +1551,109 @@
             const img = new Image();
             img.crossOrigin = "Anonymous";
             img.onload = () => {
-                // Background
-                ctx.fillStyle = '#1a1a2e';
-                ctx.fillRect(0, 0, 540, 960);
+            // Background
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, 540, 960);
 
-                // Featured Image (Center Crop)
-                // Draw coordinates scaled by 0.5
-                // Container: x=20, y=180, w=500, h=500, r=20
-                const aspect = img.width / img.height;
-                let drawWidth, drawHeight, offsetX, offsetY;
+            // Featured Image (Center Crop)
+            // Draw coordinates scaled by 0.5
+            // Container: x=20, y=180, w=500, h=500, r=20
+            const aspect = img.width / img.height;
+            let drawWidth, drawHeight, offsetX, offsetY;
 
-                // Target Box: 500x500
-                if (aspect > 540 / 600) { // Wider
-                    drawHeight = 600;
-                    drawWidth = 600 * aspect;
-                    offsetX = (540 - drawWidth) / 2;
-                    offsetY = 180;
-                } else { // Taller
-                    drawWidth = 540;
-                    drawHeight = 540 / aspect;
-                    offsetX = 0;
-                    offsetY = 180 - (drawHeight - 600) / 2;
-                }
+            // Target Box: 500x500
+            if (aspect > 540 / 600) { // Wider
+            drawHeight = 600;
+            drawWidth = 600 * aspect;
+            offsetX = (540 - drawWidth) / 2;
+            offsetY = 180;
+            } else { // Taller
+            drawWidth = 540;
+            drawHeight = 540 / aspect;
+            offsetX = 0;
+            offsetY = 180 - (drawHeight - 600) / 2;
+            }
 
-                ctx.save();
-                ctx.beginPath();
-                if (ctx.roundRect) {
-                    ctx.roundRect(20, 180, 500, 500, 20);
-                } else {
-                    ctx.rect(20, 180, 500, 500);
-                }
-                ctx.clip();
-                ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
-                ctx.restore();
+            ctx.save();
+            ctx.beginPath();
+            if (ctx.roundRect) {
+            ctx.roundRect(20, 180, 500, 500, 20);
+            } else {
+            ctx.rect(20, 180, 500, 500);
+            }
+            ctx.clip();
+            ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+            ctx.restore();
 
-                // Branding Top
-                ctx.fillStyle = '#4facfe';
-                ctx.font = 'bold 40px Poppins'; // 80 -> 40
-                ctx.textAlign = 'center';
-                ctx.fillText("CleanCity Hero", 270, 100); // 540, 200 -> 270, 100
+            // Branding Top
+            ctx.fillStyle = '#4facfe';
+            ctx.font = 'bold 40px Poppins'; // 80 -> 40
+            ctx.textAlign = 'center';
+            ctx.fillText("CleanCity Hero", 270, 100); // 540, 200 -> 270, 100
 
-                ctx.fillStyle = '#ffffff';
-                ctx.font = '20px Inter'; // 40 -> 20
-                ctx.fillText("I just reported a cleaning spot!", 270, 140);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '20px Inter'; // 40 -> 20
+            ctx.fillText("I just reported a cleaning spot!", 270, 140);
 
-                // Bottom Info
-                ctx.fillStyle = '#ffffff';
-                ctx.font = '30px Poppins'; // 60 -> 30
-                ctx.fillText("Status: REPORTED ✅", 270, 750); // 1500 -> 750
+            // Bottom Info
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '30px Poppins'; // 60 -> 30
+            ctx.fillText("Status: REPORTED ✅", 270, 750); // 1500 -> 750
 
-                ctx.font = '20px Inter'; // 40 -> 20
-                ctx.fillStyle = '#aaaaaa';
-                const date = new Date().toLocaleDateString();
-                ctx.fillText(date + " • " + (window.currentPincode || "Rank " + (Math.floor(Math.random() * 20) + 1)), 270, 800);
+            ctx.font = '20px Inter'; // 40 -> 20
+            ctx.fillStyle = '#aaaaaa';
+            const date = new Date().toLocaleDateString();
+            ctx.fillText(date + " • " + (window.currentPincode || "Rank " + (Math.floor(Math.random() * 20) + 1)), 270,
+            800);
 
-                // Logo/Footer
-                ctx.fillStyle = '#4facfe';
-                ctx.font = 'bold 25px Poppins'; // 50 -> 25
-                ctx.fillText("#CleanCityApp", 270, 900); // 1800 -> 900
+            // Logo/Footer
+            ctx.fillStyle = '#4facfe';
+            ctx.font = 'bold 25px Poppins'; // 50 -> 25
+            ctx.fillText("#CleanCityApp", 270, 900); // 1800 -> 900
 
-                // Export
-                const dataUrl = canvas.toDataURL('image/png', 0.8); // 80% quality
-                preview.src = dataUrl;
+            // Export
+            const dataUrl = canvas.toDataURL('image/png', 0.8); // 80% quality
+            preview.src = dataUrl;
 
-                canvas.toBlob(blob => {
-                    window.generatedBlob = blob;
-                }, 'image/png', 0.8);
+            canvas.toBlob(blob => {
+            window.generatedBlob = blob;
+            }, 'image/png', 0.8);
             };
             img.src = imageSrc;
-        }
+            }
 
-        window.shareImage = async () => {
+            window.shareImage = async () => {
             const statusEl = document.getElementById('share-status-msg');
             if (statusEl) {
-                statusEl.innerText = "⏳ Generating Link... Please Wait.";
-                statusEl.style.color = "var(--primary)";
+            statusEl.innerText = "⏳ Generating Link... Please Wait.";
+            statusEl.style.color = "var(--primary)";
             }
             // if (!window.generatedBlob) return showToast("Generating...", "error");
 
             // Try Native Share
             if (navigator.share && navigator.canShare) {
-                try {
-                    const file = new File([window.generatedBlob], "cleancity_share.png", { type: "image/png" });
-                    if (navigator.canShare({ files: [file] })) {
-                        await navigator.share({
-                            files: [file],
-                            title: 'CleanCity Hero',
-                            text: 'Keeping my city clean! 🌿 #CleanCity'
-                        });
-                        return; // Success
-                    }
-                } catch (e) {
-                    console.log("Native share failed", e);
-                }
+            try {
+            const file = new File([window.generatedBlob], "cleancity_share.png", { type: "image/png" });
+            if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+            files: [file],
+            title: 'CleanCity Hero',
+            text: 'Keeping my city clean! 🌿 #CleanCity'
+            });
+            return; // Success
+            }
+            } catch (e) {
+            console.log("Native share failed", e);
+            }
             }
 
             // Fallback: Show Download
             document.getElementById('download-btn').style.display = 'inline-block';
             showToast("Opening Download...", "info");
             window.downloadImage();
-        }
+            }
 
-        window.downloadImage = () => {
+            window.downloadImage = () => {
             if (!window.generatedBlob) return;
 
             showToast("Preparing download link...", "info");
@@ -1650,63 +1662,63 @@
             formData.append("image", window.generatedBlob, "CleanCity_Share.png");
 
             fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-                method: "POST",
-                body: formData
+            method: "POST",
+            body: formData
             })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        const url = data.data.url;
+            .then(res => res.json())
+            .then(data => {
+            if (data.success) {
+            const url = data.data.url;
 
-                        // Update Modal Preview 
-                        const preview = document.getElementById('share-card-preview');
-                        preview.src = url;
+            // Update Modal Preview
+            const preview = document.getElementById('share-card-preview');
+            preview.src = url;
 
-                        // DISABLED: window.open(url, '_blank'); 
+            // DISABLED: window.open(url, '_blank');
 
-                        const statusEl = document.getElementById('share-status-msg');
-                        if (statusEl) {
-                            statusEl.innerText = "✅ Ready! Long Press image to Save.";
-                            statusEl.style.color = "green";
-                        }
-                        showToast("Ready! Long Press Image.", "success");
+            const statusEl = document.getElementById('share-status-msg');
+            if (statusEl) {
+            statusEl.innerText = "✅ Ready! Long Press image to Save.";
+            statusEl.style.color = "green";
+            }
+            showToast("Ready! Long Press Image.", "success");
 
-                        if (true) {
-                            showToast("Image Ready! Long Press to Save.", "success");
-                        }
+            if (true) {
+            showToast("Image Ready! Long Press to Save.", "success");
+            }
 
-                        // Add explicit button in modal if not exists
-                        // Clean up previous buttons
-                        const oldBtn = document.getElementById('manual-link-btn');
-                        if (oldBtn) oldBtn.remove();
+            // Add explicit button in modal if not exists
+            // Clean up previous buttons
+            const oldBtn = document.getElementById('manual-link-btn');
+            if (oldBtn) oldBtn.remove();
 
-                        // Manual Link Button REMOVED to prevent App Exit Loop
+            // Manual Link Button REMOVED to prevent App Exit Loop
 
 
-                    } else {
-                        showToast("Link Gen Failed. Try Screenshot.", "error");
-                    }
-                })
+            } else {
+            showToast("Link Gen Failed. Try Screenshot.", "error");
+            }
+            })
 
-                .catch(e => {
-                    showToast("Error escaping WebView: " + e.message, "error");
-                });
-        }
+            .catch(e => {
+            showToast("Error escaping WebView: " + e.message, "error");
+            });
+            }
 
-        window.closeShareModal = () => {
+            window.closeShareModal = () => {
             document.getElementById('share-modal').style.display = 'none';
-        }
+            }
 
-        window.submitComplaint = async () => {
+            window.submitComplaint = async () => {
             if (!currentImageFile) {
-                showToast("Please upload a photo of the garbage.", "error");
-                return;
+            showToast("Please upload a photo of the garbage.", "error");
+            return;
             }
             if (!currentLat || !currentLng) {
-                showToast("Location is MANDATORY. Please Enable GPS!", "error");
-                // Try to get location again
-                requestLocationValues();
-                return;
+            showToast("Location is MANDATORY. Please Enable GPS!", "error");
+            // Try to get location again
+            requestLocationValues();
+            return;
             }
 
             const btn = document.getElementById('submit-btn');
@@ -1714,57 +1726,57 @@
             btn.disabled = true;
 
             try {
-                const formData = new FormData();
-                formData.append("image", currentImageFile);
+            const formData = new FormData();
+            formData.append("image", currentImageFile);
 
-                const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-                    method: 'POST',
-                    body: formData
-                });
-                const imgData = await imgRes.json();
+            const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+            method: 'POST',
+            body: formData
+            });
+            const imgData = await imgRes.json();
 
-                if (!imgData.success) throw new Error("Image Upload Failed");
+            if (!imgData.success) throw new Error("Image Upload Failed");
 
-                const imageUrl = imgData.data.url;
-                const user = JSON.parse(localStorage.getItem('user'));
-                const resEl = document.getElementById('final-res');
-                const wasteType = (resEl && resEl.dataset.val) ? resEl.dataset.val : "General Waste";
+            const imageUrl = imgData.data.url;
+            const user = JSON.parse(localStorage.getItem('user'));
+            const resEl = document.getElementById('final-res');
+            const wasteType = (resEl && resEl.dataset.val) ? resEl.dataset.val : "General Waste";
 
 
-                const complaintsRef = firebaseDb.ref(db, 'complaints');
-                const newRef = firebaseDb.push(complaintsRef);
-                await firebaseDb.set(newRef, {
-                    image_url: imageUrl,
-                    lat: currentLat || 0,
-                    lng: currentLng || 0,
-                    pincode: window.currentPincode || '',
-                    userId: user.email,
-                    userName: user.name,
-                    status: 'pending',
-                    type: wasteType,
-                    timestamp: Date.now()
-                });
+            const complaintsRef = firebaseDb.ref(db, 'complaints');
+            const newRef = firebaseDb.push(complaintsRef);
+            await firebaseDb.set(newRef, {
+            image_url: imageUrl,
+            lat: currentLat || 0,
+            lng: currentLng || 0,
+            pincode: window.currentPincode || '',
+            userId: user.email,
+            userName: user.name,
+            status: 'pending',
+            type: wasteType,
+            timestamp: Date.now()
+            });
 
-                showToast("Complaint Submitted Successfully!", "success");
+            showToast("Complaint Submitted Successfully!", "success");
 
-                // Trigger Share Modal
-                openShareModal(imageUrl, currentLat, currentLng);
+            // Trigger Share Modal
+            openShareModal(imageUrl, currentLat, currentLng);
 
-                resetReportForm();
+            resetReportForm();
 
             } catch (err) {
-                console.error(err);
-                if (err.message === "Image Upload Failed") {
-                } else {
-                    showToast("Error: " + err.message, "error");
-                }
-                btn.innerHTML = "SUBMIT REPORT <i class='fa-solid fa-paper-plane'></i>";
-                btn.classList.add('btn-glow');
-                btn.disabled = false;
+            console.error(err);
+            if (err.message === "Image Upload Failed") {
+            } else {
+            showToast("Error: " + err.message, "error");
             }
-        };
+            btn.innerHTML = "SUBMIT REPORT <i class='fa-solid fa-paper-plane'></i>";
+            btn.classList.add('btn-glow');
+            btn.disabled = false;
+            }
+            };
 
-        window.resetReportForm = () => {
+            window.resetReportForm = () => {
             currentImageFile = null;
 
             if (document.getElementById('file-cam')) document.getElementById('file-cam').value = "";
@@ -1782,472 +1794,505 @@
             btn.innerHTML = "SUBMIT REPORT <i class='fa-solid fa-paper-plane'></i>";
             btn.disabled = true;
             btn.classList.remove('btn-glow');
-        };
+            };
 
-        function loadUserData(email) {
+            function loadUserData(email) {
             if (!email) return;
 
             const userId = email.replace(/\./g, '_');
             const userRef = firebaseDb.ref(db, 'users/' + userId);
 
             firebaseDb.onValue(userRef, (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    currentUserData = data;
-                    document.getElementById('user-points').innerText = data.points || 0;
-                    document.getElementById('user-reports').innerText = data.reports || 0;
+            const data = snapshot.val();
+            if (data) {
+            currentUserData = data;
+            document.getElementById('user-points').innerText = data.points || 0;
+            document.getElementById('user-reports').innerText = data.reports || 0;
 
-                    if (document.getElementById('view-profile') && document.getElementById('view-profile').style.display === 'block') {
-                        populateProfileView();
-                    }
-                } else {
-                    const initData = { points: 0, reports: 0, email: email };
-                    firebaseDb.set(userRef, initData);
-                    currentUserData = initData;
-                }
+            if (document.getElementById('view-profile') && document.getElementById('view-profile').style.display ===
+            'block') {
+            populateProfileView();
+            }
+            } else {
+            const initData = { points: 0, reports: 0, email: email };
+            firebaseDb.set(userRef, initData);
+            currentUserData = initData;
+            }
             });
 
             const complaintsRef = firebaseDb.ref(db, 'complaints');
             firebaseDb.onValue(complaintsRef, (snapshot) => {
-                const data = snapshot.val();
-                if (!data) return;
+            const data = snapshot.val();
+            if (!data) return;
 
-                const myComplaints = Object.entries(data)
-                    .map(([key, val]) => ({ id: key, ...val }))
-                    .filter(c => c.userId === email)
-                    .sort((a, b) => b.timestamp - a.timestamp);
+            const myComplaints = Object.entries(data)
+            .map(([key, val]) => ({ id: key, ...val }))
+            .filter(c => c.userId === email)
+            .sort((a, b) => b.timestamp - a.timestamp);
 
-                const pendingCount = myComplaints.filter(c => c.status === 'pending').length;
-                const pendingEl = document.getElementById('user-pending');
-                if (pendingEl) pendingEl.innerText = pendingCount;
+            const pendingCount = myComplaints.filter(c => c.status === 'pending').length;
+            const pendingEl = document.getElementById('user-pending');
+            if (pendingEl) pendingEl.innerText = pendingCount;
 
-                const totalReports = myComplaints.length;
-                const reportsEl = document.getElementById('user-reports');
-                if (reportsEl) reportsEl.innerText = totalReports;
+            const totalReports = myComplaints.length;
+            const reportsEl = document.getElementById('user-reports');
+            if (reportsEl) reportsEl.innerText = totalReports;
 
-                if (currentUserData) currentUserData.reports = totalReports;
+            if (currentUserData) currentUserData.reports = totalReports;
 
-                const activityList = document.getElementById('activity-list');
-                if (myComplaints.length === 0) {
-                    activityList.innerHTML = `
-                        <div class="glass" style="text-align: center; color: var(--text-light); padding: 40px;">
-                            <i class="fa-solid fa-seedling" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
-                            <p>No activity yet. Start by reporting waste!</p>
-                        </div>`;
-                    return;
-                }
-
-                let html = '';
-                myComplaints.forEach(c => {
-                    const date = new Date(c.timestamp).toLocaleDateString();
-
-
-                    const statusClass = `status-${c.status || 'pending'}`;
-                    const statusIcon = c.status === 'resolved' ? 'fa-check-circle' : (c.status === 'rejected' ? 'fa-times-circle' : 'fa-clock');
-
-
-                    const deleteBtn = `<button class="delete-btn" onclick="deleteComplaint('${c.id}')" title="Delete Report"><i class="fa-solid fa-trash"></i></button>`;
-
-                    html += `
-                        <div class="glass ${statusClass}" style="padding: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; border-radius: 12px; box-shadow: var(--shadow);">
-                            <div style="width: 50px; height: 50px; border-radius: 8px; overflow: hidden; flex-shrink: 0;">
-                                <img src="${c.image_url}" style="width: 100%; height: 100%; object-fit: cover;">
-                            </div>
-                            <div style="flex: 1;">
-                                <h4 style="margin: 0; font-size: 1rem;">${c.type}</h4>
-                                <small style="opacity: 0.8;">${date}</small>
-                            </div>
-                            <div style="text-align: right; display:flex; align-items:center; justify-content:flex-end; gap: 10px;">
-                                 <div style="display: flex; flex-direction: column; align-items: flex-end;">
-                                    <span style="font-weight: bold; font-size: 0.8rem; text-transform: uppercase;">
-                                        ${c.status === 'resolved' ? 'Resolved' : (c.status === 'rejected' ? 'Rejected (Spam)' : c.status)}
-                                    </span>
-                                    ${c.status === 'resolved' ? '<small style="color:var(--success); font-size:0.7rem;">+10 Pts</small>' : ''}
-                                 </div>
-                                 <div style="width:1px; height:20px; background:rgba(0,0,0,0.1); margin:0 5px;"></div>
-                                 ${deleteBtn}
-                            </div>
-                        </div>
-                    `;
-                });
-                activityList.innerHTML = html;
-            });
-        }
-
-        window.deleteComplaint = (id) => {
-            if (confirm("Are you sure you want to delete this report?")) {
-                firebaseDb.remove(firebaseDb.ref(db, 'complaints/' + id))
-                    .then(() => showToast("Report deleted.", "success"))
-                    .catch(err => showToast("Error: " + err.message, "error"));
+            const activityList = document.getElementById('activity-list');
+            if (myComplaints.length === 0) {
+            activityList.innerHTML = `
+            <div class="glass" style="text-align: center; color: var(--text-light); padding: 40px;">
+                <i class="fa-solid fa-seedling" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
+                <p>No activity yet. Start by reporting waste!</p>
+            </div>`;
+            return;
             }
-        }
 
-        function loadLeaderboard() {
+            let html = '';
+            myComplaints.forEach(c => {
+            const date = new Date(c.timestamp).toLocaleDateString();
+
+
+            const statusClass = `status-${c.status || 'pending'}`;
+            const statusIcon = c.status === 'resolved' ? 'fa-check-circle' : (c.status === 'rejected' ?
+            'fa-times-circle' :
+            'fa-clock');
+
+
+            const deleteBtn = `<button class="delete-btn" onclick="deleteComplaint('${c.id}')" title="Delete Report"><i
+                    class="fa-solid fa-trash"></i></button>`;
+
+            html += `
+            <div class="glass ${statusClass}"
+                style="padding: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; border-radius: 12px; box-shadow: var(--shadow);">
+                <div style="width: 50px; height: 50px; border-radius: 8px; overflow: hidden; flex-shrink: 0;">
+                    <img src="${c.image_url}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="flex: 1;">
+                    <h4 style="margin: 0; font-size: 1rem;">${c.type}</h4>
+                    <small style="opacity: 0.8;">${date}</small>
+                </div>
+                <div style="text-align: right; display:flex; align-items:center; justify-content:flex-end; gap: 10px;">
+                    <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                        <span style="font-weight: bold; font-size: 0.8rem; text-transform: uppercase;">
+                            ${c.status === 'resolved' ? 'Resolved' : (c.status === 'rejected' ? 'Rejected (Spam)' :
+                            c.status)}
+                        </span>
+                        ${c.status === 'resolved' ? '<small style="color:var(--success); font-size:0.7rem;">+10
+                            Pts</small>'
+                        : ''}
+                    </div>
+                    <div style="width:1px; height:20px; background:rgba(0,0,0,0.1); margin:0 5px;"></div>
+                    ${deleteBtn}
+                </div>
+            </div>
+            `;
+            });
+            activityList.innerHTML = html;
+            });
+            }
+
+            window.deleteComplaint = (id) => {
+            if (confirm("Are you sure you want to delete this report?")) {
+            firebaseDb.remove(firebaseDb.ref(db, 'complaints/' + id))
+            .then(() => showToast("Report deleted.", "success"))
+            .catch(err => showToast("Error: " + err.message, "error"));
+            }
+            }
+
+            function loadLeaderboard() {
             const container = document.getElementById('leaderboard-list');
             const usersRef = firebaseDb.ref(db, 'users');
 
             firebaseDb.onValue(usersRef, (snapshot) => {
-                const data = snapshot.val();
-                if (!data) {
-                    container.innerHTML = '<div style="padding:10px; opacity:0.6">No users found</div>';
-                    return;
-                }
+            const data = snapshot.val();
+            if (!data) {
+            container.innerHTML = '<div style="padding:10px; opacity:0.6">No users found</div>';
+            return;
+            }
 
-                const sortedUsers = Object.values(data).sort((a, b) => (b.points || 0) - (a.points || 0));
+            const sortedUsers = Object.values(data).sort((a, b) => (b.points || 0) - (a.points || 0));
 
-                let html = '';
-                const currentUserEmail = JSON.parse(localStorage.getItem('user') || '{}').email;
+            let html = '';
+            const currentUserEmail = JSON.parse(localStorage.getItem('user') || '{}').email;
 
-                sortedUsers.forEach((u, i) => {
-                    const isMe = u.email === currentUserEmail;
-                    const rank = i + 1;
-                    let rankDisplay = `<span style="font-weight: bold; width: 30px; color: var(--text-light); text-align:center;">#${rank}</span>`;
+            sortedUsers.forEach((u, i) => {
+            const isMe = u.email === currentUserEmail;
+            const rank = i + 1;
+            let rankDisplay = `<span
+                style="font-weight: bold; width: 30px; color: var(--text-light); text-align:center;">#${rank}</span>`;
 
-                    if (rank === 1) rankDisplay = '<i class="fa-solid fa-medal" style="width: 30px; text-align:center; color: #FFD700; font-size: 1.5rem;"></i>';
-                    if (rank === 2) rankDisplay = '<i class="fa-solid fa-medal" style="width: 30px; text-align:center; color: #C0C0C0; font-size: 1.5rem;"></i>';
-                    if (rank === 3) rankDisplay = '<i class="fa-solid fa-medal" style="width: 30px; text-align:center; color: #CD7F32; font-size: 1.5rem;"></i>';
+            if (rank === 1) rankDisplay = '<i class="fa-solid fa-medal"
+                style="width: 30px; text-align:center; color: #FFD700; font-size: 1.5rem;"></i>';
+            if (rank === 2) rankDisplay = '<i class="fa-solid fa-medal"
+                style="width: 30px; text-align:center; color: #C0C0C0; font-size: 1.5rem;"></i>';
+            if (rank === 3) rankDisplay = '<i class="fa-solid fa-medal"
+                style="width: 30px; text-align:center; color: #CD7F32; font-size: 1.5rem;"></i>';
 
-                    const highlightStyle = isMe ? 'background: rgba(67, 97, 238, 0.1); border: 2px solid var(--primary); border-radius: 8px;' : 'border-bottom: 1px solid #eee;';
+            const highlightStyle = isMe ? 'background: rgba(67, 97, 238, 0.1); border: 2px solid var(--primary);
+            border-radius: 8px;' : 'border-bottom: 1px solid #eee;';
 
-                    html += `
-                        <div style="display: flex; justify-content: space-between; padding: 12px; align-items: center; ${highlightStyle}">
-                            <div style="display: flex; gap: 10px; align-items: center;">
-                                ${rankDisplay}
-                                <div style="display:flex; flex-direction:column;">
-                                    <span style="font-weight: 600; text-transform: capitalize;">${u.name || (u.email ? u.email.split('@')[0] : 'User')} ${isMe ? '(You)' : ''}</span>
-                                    <small style="font-size: 0.75rem; color: var(--text-light);">${u.reports || 0} Reports</small>
-                                </div>
-                            </div>
-                            <span style="font-weight: bold; color: var(--primary); font-size: 1.1rem;">${u.points || 0}</span>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
+            html += `
+            <div
+                style="display: flex; justify-content: space-between; padding: 12px; align-items: center; ${highlightStyle}">
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    ${rankDisplay}
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="font-weight: 600; text-transform: capitalize;">${u.name || (u.email ?
+                            u.email.split('@')[0] : 'User')} ${isMe ? '(You)' : ''}</span>
+                        <small style="font-size: 0.75rem; color: var(--text-light);">${u.reports || 0} Reports</small>
+                    </div>
+                </div>
+                <span style="font-weight: bold; color: var(--primary); font-size: 1.1rem;">${u.points || 0}</span>
+            </div>
+            `;
             });
-        }
+            container.innerHTML = html;
+            });
+            }
 
-        function initMap() {
+            function initMap() {
             if (document.getElementById('user-map') && !map) {
-                // Default to India (Generic) instead of specific location
-                map = L.map('user-map', { scrollWheelZoom: false }).setView([20.5937, 78.9629], 5);
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                }).addTo(map);
-
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(pos => {
-                        const lat = pos.coords.latitude;
-                        const lng = pos.coords.longitude;
-
-                        currentLat = lat;
-                        currentLng = lng;
-
-                        map.setView([lat, lng], 15);
-
-                        L.circleMarker([lat, lng], {
-                            radius: 10,
-                            fillColor: '#4361ee',
-                            color: '#fff',
-                            weight: 3,
-                            fillOpacity: 0.9
-                        }).addTo(map).bindPopup("<b>You are here</b>").openPopup();
-                    }, (err) => {
-                        console.warn("GPS Error:", err);
-                        showToast("Location access denied. Showing default view.", "info");
-                    }, { enableHighAccuracy: true });
-                }
-
-                const complaintsRef = firebaseDb.ref(db, 'complaints');
-                firebaseDb.onValue(complaintsRef, (snapshot) => {
-                    const data = snapshot.val();
-                    if (!data) return;
-
-                    const markers = [];
-                    Object.values(data).forEach(val => {
-                        if (val.lat && val.lng) {
-                            const color = val.status === 'resolved' ? '#4cc9f0' : '#f8961e';
-                            const marker = L.circleMarker([val.lat, val.lng], {
-                                radius: 8,
-                                fillColor: color,
-                                color: '#fff',
-                                weight: 2,
-                                opacity: 1,
-                                fillOpacity: 0.8
-                            }).addTo(map);
-                            marker.bindPopup(`<b>${val.type}</b><br>${val.status}`);
-                            markers.push(marker);
-                        }
-                    });
-
-                    if (markers.length > 0) {
-                        const group = new L.featureGroup(markers);
-                        map.fitBounds(group.getBounds().pad(0.1));
-                    }
-                });
-            }
-        }
-
-    </script>
-
-
-    <script>
-        window.forceCamera = () => {
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: true })
-                    .then(stream => {
-                        stream.getTracks().forEach(t => t.stop());
-                        document.getElementById('file-cam').click();
-                    })
-                    .catch(e => {
-                        alert("Permission/Error: " + e.message);
-                        document.getElementById('file-cam').click();
-                    });
-            } else {
-                document.getElementById('file-cam').click();
-            }
-        }
-
-        window.requestLocationValues = () => {
-            // Request Camera Permission concurrently
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: true })
-                    .then(stream => {
-                        stream.getTracks().forEach(t => t.stop());
-                        console.log("Camera Permission Granted");
-                    })
-                    .catch(e => console.log("Camera Permission Denied", e));
-            }
-
-            const locStat = document.getElementById('loc-status');
-            if (locStat) locStat.innerHTML = `<span style="color:var(--text-light)"><i class="fa-solid fa-circle-notch fa-spin"></i> Detecting...</span>`;
+            // Default to India (Generic) instead of specific location
+            map = L.map('user-map', { scrollWheelZoom: false }).setView([20.5937, 78.9629], 5);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy;
+            <a href="https://carto.com/attributions">CARTO</a>'
+            }).addTo(map);
 
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        currentLat = pos.coords.latitude;
-                        currentLng = pos.coords.longitude;
-                        if (locStat) locStat.innerHTML = `<span style="color:green"><i class="fa-solid fa-check"></i> Location Locked</span>`;
+            navigator.geolocation.getCurrentPosition(pos => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
 
-                        // Fetch Pincode
-                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLat}&lon=${currentLng}`)
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data.address && data.address.postcode) {
-                                    window.currentPincode = data.address.postcode;
-                                    if (locStat) locStat.innerHTML += ` <small>(${window.currentPincode})</small>`;
+            currentLat = lat;
+            currentLng = lng;
+
+            map.setView([lat, lng], 15);
+
+            L.circleMarker([lat, lng], {
+            radius: 10,
+            fillColor: '#4361ee',
+            color: '#fff',
+            weight: 3,
+            fillOpacity: 0.9
+            }).addTo(map).bindPopup("<b>You are here</b>").openPopup();
+            }, (err) => {
+            console.warn("GPS Error:", err);
+            showToast("Location access denied. Showing default view.", "info");
+            }, { enableHighAccuracy: true });
+            }
+
+            const complaintsRef = firebaseDb.ref(db, 'complaints');
+            firebaseDb.onValue(complaintsRef, (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
+
+            const markers = [];
+            Object.values(data).forEach(val => {
+            if (val.lat && val.lng) {
+            const color = val.status === 'resolved' ? '#4cc9f0' : '#f8961e';
+            const marker = L.circleMarker([val.lat, val.lng], {
+            radius: 8,
+            fillColor: color,
+            color: '#fff',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.8
+            }).addTo(map);
+            marker.bindPopup(`<b>${val.type}</b><br>${val.status}`);
+            markers.push(marker);
+            }
+            });
+
+            if (markers.length > 0) {
+            const group = new L.featureGroup(markers);
+            map.fitBounds(group.getBounds().pad(0.1));
+            }
+            });
+            }
+            }
+
+            </script>
+
+
+            <script>
+                window.forceCamera = () => {
+                    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                        navigator.mediaDevices.getUserMedia({ video: true })
+                            .then(stream => {
+                                stream.getTracks().forEach(t => t.stop());
+                                document.getElementById('file-cam').click();
+                            })
+                            .catch(e => {
+                                alert("Permission/Error: " + e.message);
+                                document.getElementById('file-cam').click();
+                            });
+                    } else {
+                        document.getElementById('file-cam').click();
+                    }
+                }
+
+                window.requestLocationValues = () => {
+                    // Request Camera Permission concurrently
+                    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                        navigator.mediaDevices.getUserMedia({ video: true })
+                            .then(stream => {
+                                stream.getTracks().forEach(t => t.stop());
+                                console.log("Camera Permission Granted");
+                            })
+                            .catch(e => console.log("Camera Permission Denied", e));
+                    }
+
+                    const locStat = document.getElementById('loc-status');
+                    if (locStat) locStat.innerHTML = `<span style="color:var(--text-light)"><i class="fa-solid fa-circle-notch fa-spin"></i> Detecting...</span>`;
+
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            (pos) => {
+                                currentLat = pos.coords.latitude;
+                                currentLng = pos.coords.longitude;
+                                if (locStat) locStat.innerHTML = `<span style="color:green"><i class="fa-solid fa-check"></i> Location Locked</span>`;
+
+                                // Fetch Pincode
+                                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLat}&lon=${currentLng}`)
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if (data.address && data.address.postcode) {
+                                            window.currentPincode = data.address.postcode;
+                                            if (locStat) locStat.innerHTML += ` <small>(${window.currentPincode})</small>`;
+                                        }
+                                    }).catch(e => console.log("Pincode fetch error", e));
+                            },
+                            (err) => {
+                                console.log("Auto-Loc Failed:", err);
+                                currentLat = null;
+                                currentLng = null;
+                                let msg = "Location Required!";
+                                let btn = `<button onclick="requestLocationValues()" style="margin-left:5px; padding:2px 8px; font-size:0.8rem;">Retry</button>`;
+
+                                if (err.code === 1) { // Permission Denied
+                                    msg = "Permission Denied! Enable in Settings.";
+                                    btn = `<button onclick="alert('Please go to Phone Settings > Apps > CleanCity > Permissions > Location > Allow.')" style="margin-left:5px; padding:2px 8px; font-size:0.8rem; background:var(--danger); color:white;">Fix?</button> <button onclick="requestLocationValues()" style="margin-left:5px; padding:2px 8px; font-size:0.8rem;">Retry</button>`;
                                 }
-                            }).catch(e => console.log("Pincode fetch error", e));
-                    },
-                    (err) => {
-                        console.log("Auto-Loc Failed:", err);
-                        currentLat = null;
-                        currentLng = null;
-                        let msg = "Location Required!";
-                        let btn = `<button onclick="requestLocationValues()" style="margin-left:5px; padding:2px 8px; font-size:0.8rem;">Retry</button>`;
 
-                        if (err.code === 1) { // Permission Denied
-                            msg = "Permission Denied! Enable in Settings.";
-                            btn = `<button onclick="alert('Please go to Phone Settings > Apps > CleanCity > Permissions > Location > Allow.')" style="margin-left:5px; padding:2px 8px; font-size:0.8rem; background:var(--danger); color:white;">Fix?</button> <button onclick="requestLocationValues()" style="margin-left:5px; padding:2px 8px; font-size:0.8rem;">Retry</button>`;
-                        }
-
-                        if (locStat) {
-                            locStat.innerHTML = `
+                                if (locStat) {
+                                    locStat.innerHTML = `
                                 <span style="color:red; font-weight:bold; font-size: 0.8rem;"><i class="fa-solid fa-circle-exclamation"></i> ${msg}</span>
                                 ${btn}
                             `;
-                        }
-                    },
-                    { enableHighAccuracy: true, timeout: 10000 }
-                );
-            } else {
-                if (locStat) locStat.innerHTML = "GPS Not Supported";
-            }
-        }
-
-        // T&C Logic (Inside Module)
-        window.checkTerms = function (user) {
-            const localAccepted = localStorage.getItem('terms_accepted_' + user.email);
-            if (user.termsAccepted === true) {
-                localStorage.setItem('terms_accepted_' + user.email, 'true');
-                return;
-            }
-            document.getElementById('terms-modal').style.display = 'flex';
-        }
-
-        window.acceptTerms = function () {
-            const user = JSON.parse(localStorage.getItem('user'));
-            if (!user) return;
-            document.getElementById('terms-modal').style.display = 'none';
-            localStorage.setItem('terms_accepted_' + user.email, 'true');
-
-            const userId = user.email.replace(/\./g, '_');
-            const termsRef = firebaseDb.ref(db, 'users/' + userId + '/termsAccepted');
-            firebaseDb.set(termsRef, true)
-                .then(() => showToast("Terms Accepted 🤝", "success"))
-                .catch(err => console.error(err));
-        }
-
-        window.declineTerms = function () {
-            if (confirm("If you decline, you cannot use the application. Are you sure?")) {
-                logout();
-            }
-        }
-    </script>
-
-
-    </script>
-    <script>
-        // Aggressive Pull-to-Refresh Blocker
-        let touchStartY = 0;
-        document.addEventListener('touchstart', (e) => {
-            touchStartY = e.touches[0].clientY;
-        }, { passive: false });
-
-        document.addEventListener('touchmove', (e) => {
-            const touchY = e.touches[0].clientY;
-            const touchDiff = touchY - touchStartY;
-
-
-            if (e.target.closest('#terms-modal')) return;
-
-            if (window.scrollY === 0 && touchDiff > 0) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        // Explicitly Request Camera Permission before opening Input
-        window.triggerCameraWithPermission = async () => {
-            // 1. Try to get Permission via getUserMedia
-            try {
-                showToast("Checking access...", "info");
-                // Use Environment camera preference
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-
-                // If we get here, Permission is GRANTED
-                // Stop the stream immediately
-                stream.getTracks().forEach(track => track.stop());
-
-                // 2. Now Open Native Camera (Input click)
-                const input = document.getElementById('file-cam');
-                // Temporarily unhide to ensure click works? No, visually-hidden is fine usually.
-                input.click();
-
-            } catch (err) {
-                console.error("Camera Error:", err);
-                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-                    alert("CAMERA PERMISSION DENIED! 🚫\n\n1. Go to Settings > Apps > CleanCity\n2. Tap Permissions\n3. Allow Camera\n\nThen try again!");
-                } else {
-                    alert("Camera Error: " + err.message + "\nTry settings manually.");
+                                }
+                            },
+                            { enableHighAccuracy: true, timeout: 10000 }
+                        );
+                    } else {
+                        if (locStat) locStat.innerHTML = "GPS Not Supported";
+                    }
                 }
-                // Try fallback click anyway
-                document.getElementById('file-cam').click();
-            }
-        }
 
-        // Permission Onboarding Logic
-        window.requestAllPermissions = async () => {
-            showToast("Checking Permissions...", "info");
+                // T&C Logic (Inside Module)
+                window.checkTerms = function (user) {
+                    const localAccepted = localStorage.getItem('terms_accepted_' + user.email);
+                    if (user.termsAccepted === true) {
+                        localStorage.setItem('terms_accepted_' + user.email, 'true');
+                        return;
+                    }
+                    document.getElementById('terms-modal').style.display = 'flex';
+                }
 
-            // 1. Camera
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                stream.getTracks().forEach(t => t.stop()); // Release
-            } catch (e) {
-                console.warn("Camera denied", e);
-            }
+                window.acceptTerms = function () {
+                    const user = JSON.parse(localStorage.getItem('user'));
+                    if (!user) return;
+                    document.getElementById('terms-modal').style.display = 'none';
+                    localStorage.setItem('terms_accepted_' + user.email, 'true');
 
-            // 2. Location
-            requestLocationValues();
+                    const userId = user.email.replace(/\./g, '_');
+                    const termsRef = firebaseDb.ref(db, 'users/' + userId + '/termsAccepted');
+                    firebaseDb.set(termsRef, true)
+                        .then(() => showToast("Terms Accepted 🤝", "success"))
+                        .catch(err => console.error(err));
+                }
 
-            // Done
-            document.getElementById('permission-modal').style.display = 'none';
-            localStorage.setItem('permissions_requested', 'true');
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            // Check if we need to show Modal
-            const hasAsked = localStorage.getItem('permissions_requested');
-
-            // If first time, show modal after small delay
-            if (!hasAsked) {
-                // Disabled by User Request
-                localStorage.setItem('permissions_requested', 'true');
-                // document.getElementById('permission-modal').style.display = 'flex';
-            } else {
-                // Background check location anyway
-                requestLocationValues();
-            }
-        });
-    </script>
+                window.declineTerms = function () {
+                    if (confirm("If you decline, you cannot use the application. Are you sure?")) {
+                        logout();
+                    }
+                }
+            </script>
 
 
+            </script>
+            <script>
+                // Aggressive Pull-to-Refresh Blocker
+                let touchStartY = 0;
+                document.addEventListener('touchstart', (e) => {
+                    touchStartY = e.touches[0].clientY;
+                }, { passive: false });
+
+                document.addEventListener('touchmove', (e) => {
+                    const touchY = e.touches[0].clientY;
+                    const touchDiff = touchY - touchStartY;
 
 
-    <!-- Terms & Conditions Modal -->
-    <div id="terms-modal"
-        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 50000; align-items: center; justify-content: center;">
-        <div
-            style="width: 90%; max-width: 500px; height: 75vh; max-height: 600px; background: white; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; animation: slideUp 0.4s ease-out; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+                    if (e.target.closest('#terms-modal')) return;
+
+                    if (window.scrollY === 0 && touchDiff > 0) {
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+
+                // Explicitly Request Camera Permission before opening Input
+                window.triggerCameraWithPermission = async () => {
+                    // 1. Try to get Permission via getUserMedia
+                    try {
+                        showToast("Checking access...", "info");
+                        // Use Environment camera preference
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+
+                        // If we get here, Permission is GRANTED
+                        // Stop the stream immediately
+                        stream.getTracks().forEach(track => track.stop());
+
+                        // 2. Now Open Native Camera (Input click)
+                        const input = document.getElementById('file-cam');
+                        // Temporarily unhide to ensure click works? No, visually-hidden is fine usually.
+                        input.click();
+
+                    } catch (err) {
+                        console.error("Camera Error:", err);
+                        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                            alert("CAMERA PERMISSION DENIED! 🚫\n\n1. Go to Settings > Apps > CleanCity\n2. Tap Permissions\n3. Allow Camera\n\nThen try again!");
+                        } else {
+                            alert("Camera Error: " + err.message + "\nTry settings manually.");
+                        }
+                        // Try fallback click anyway
+                        document.getElementById('file-cam').click();
+                    }
+                }
+
+                // Permission Onboarding Logic
+                window.requestAllPermissions = async () => {
+                    showToast("Checking Permissions...", "info");
+
+                    // 1. Camera
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        stream.getTracks().forEach(t => t.stop()); // Release
+                    } catch (e) {
+                        console.warn("Camera denied", e);
+                    }
+
+                    // 2. Location
+                    requestLocationValues();
+
+                    // Done
+                    document.getElementById('permission-modal').style.display = 'none';
+                    localStorage.setItem('permissions_requested', 'true');
+                }
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    // Check if we need to show Modal
+                    const hasAsked = localStorage.getItem('permissions_requested');
+
+                    // If first time, show modal after small delay
+                    if (!hasAsked) {
+                        // Disabled by User Request
+                        localStorage.setItem('permissions_requested', 'true');
+                        // document.getElementById('permission-modal').style.display = 'flex';
+                    } else {
+                        // Background check location anyway
+                        requestLocationValues();
+                    }
+                });
+            </script>
 
 
-            <div
-                style="background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); padding: 20px 20px; color: white; flex-shrink: 0;">
-                <div style="display: flex; justify-content: space-between; align-items: start;">
-                    <div>
-                        <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700;">Terms & Conditions</h2>
-                        <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 0.85rem;">Last updated: January 2026</p>
+
+
+            <!-- Terms & Conditions Modal -->
+            <div id="terms-modal"
+                style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 50000; align-items: center; justify-content: center;">
+                <div
+                    style="width: 90%; max-width: 500px; height: 75vh; max-height: 600px; background: white; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; animation: slideUp 0.4s ease-out; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+
+
+                    <div
+                        style="background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); padding: 20px 20px; color: white; flex-shrink: 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700;">Terms & Conditions</h2>
+                                <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 0.85rem;">Last updated: January
+                                    2026
+                                </p>
+                            </div>
+                        </div>
+                        <p style="margin-top: 20px; font-size: 1rem; line-height: 1.4;">
+                            Hello <br> To continue using the app, please read and accept our Terms & Conditions.
+                        </p>
+                    </div>
+
+
+                    <div
+                        style="flex: 1; overflow-y: auto; padding: 25px; color: #333; font-size: 0.95rem; line-height: 1.6;">
+                        <p style="margin-bottom: 20px;">By using this app, you agree to the following Terms &
+                            Conditions:
+                        </p>
+
+                        <p style="margin-bottom: 10px;"><strong>1.</strong> Users must be 13 years or older to use the
+                            app.
+                        </p>
+                        <p style="margin-bottom: 10px;"><strong>2.</strong> Users must provide correct and accurate
+                            information.
+                        </p>
+                        <p style="margin-bottom: 10px;"><strong>3.</strong> The leaderboard system will be completely
+                            score-based.</p>
+                        <p style="margin-bottom: 10px;"><strong>4.</strong> The user who stays at the top of the
+                            leaderboard
+                            will be considered the winner.</p>
+                        <p style="margin-bottom: 10px;"><strong>5.</strong> The app team’s decision will be final.</p>
+                        <p style="margin-bottom: 10px;"><strong>6.</strong> In case of any dispute, the judgment of our
+                            team
+                            will be valid and final.</p>
+                        <p style="margin-bottom: 10px;"><strong>7.</strong> Any kind of cheating, hacking, automation
+                            tools,
+                            scripts, or fake accounts is strictly not allowed.</p>
+                        <p style="margin-bottom: 10px;"><strong>8.</strong> If any user is found doing unfair
+                            activities:
+                            Their
+                            account will be banned.</p>
+                        <p style="margin-bottom: 10px;"><strong>9.</strong> We may update the game rules, leaderboard
+                            system,
+                            reward structure, or terms at any time. Continuing to use the app means you accept the
+                            updated
+                            terms.</p>
+                        <p style="margin-bottom: 10px;"><strong>10.</strong> For any complaints, issues, or support,
+                            users
+                            can
+                            contact us through the support section/contact form in the app.</p>
+
+
+
+
+
+
+                    </div>
+
+
+                    <div
+                        style="padding: 20px 25px; background: white; border-top: 1px solid #eee; display: flex; gap: 15px; flex-shrink: 0;">
+                        <button onclick="declineTerms()"
+                            style="flex: 1; padding: 15px; border-radius: 50px; border: 2px solid #ddd; background: #f8f9fa; color: #666; font-weight: bold; font-size: 1rem;">
+                            Decline
+                        </button>
+                        <button onclick="acceptTerms()"
+                            style="flex: 1; padding: 15px; border-radius: 50px; border: none; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); color: white; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 15px rgba(37, 117, 252, 0.3);">
+                            Accept
+                        </button>
                     </div>
                 </div>
-                <p style="margin-top: 20px; font-size: 1rem; line-height: 1.4;">
-                    Hello <br> To continue using the app, please read and accept our Terms & Conditions.
-                </p>
             </div>
-
-
-            <div style="flex: 1; overflow-y: auto; padding: 25px; color: #333; font-size: 0.95rem; line-height: 1.6;">
-                <p style="margin-bottom: 20px;">By using this app, you agree to the following Terms & Conditions:</p>
-
-                <p style="margin-bottom: 10px;"><strong>1.</strong> Users must be 13 years or older to use the app.</p>
-                <p style="margin-bottom: 10px;"><strong>2.</strong> Users must provide correct and accurate information.
-                </p>
-                <p style="margin-bottom: 10px;"><strong>3.</strong> The leaderboard system will be completely
-                    score-based.</p>
-                <p style="margin-bottom: 10px;"><strong>4.</strong> The user who stays at the top of the leaderboard
-                    will be considered the winner.</p>
-                <p style="margin-bottom: 10px;"><strong>5.</strong> The app team’s decision will be final.</p>
-                <p style="margin-bottom: 10px;"><strong>6.</strong> In case of any dispute, the judgment of our team
-                    will be valid and final.</p>
-                <p style="margin-bottom: 10px;"><strong>7.</strong> Any kind of cheating, hacking, automation tools,
-                    scripts, or fake accounts is strictly not allowed.</p>
-                <p style="margin-bottom: 10px;"><strong>8.</strong> If any user is found doing unfair activities: Their
-                    account will be banned.</p>
-                <p style="margin-bottom: 10px;"><strong>9.</strong> We may update the game rules, leaderboard system,
-                    reward structure, or terms at any time. Continuing to use the app means you accept the updated
-                    terms.</p>
-                <p style="margin-bottom: 10px;"><strong>10.</strong> For any complaints, issues, or support, users can
-                    contact us through the support section/contact form in the app.</p>
-
-
-
-
-
-
-            </div>
-
-
-            <div
-                style="padding: 20px 25px; background: white; border-top: 1px solid #eee; display: flex; gap: 15px; flex-shrink: 0;">
-                <button onclick="declineTerms()"
-                    style="flex: 1; padding: 15px; border-radius: 50px; border: 2px solid #ddd; background: #f8f9fa; color: #666; font-weight: bold; font-size: 1rem;">
-                    Decline
-                </button>
-                <button onclick="acceptTerms()"
-                    style="flex: 1; padding: 15px; border-radius: 50px; border: none; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); color: white; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 15px rgba(37, 117, 252, 0.3);">
-                    Accept
-                </button>
-            </div>
-        </div>
-    </div>
 
 
 </body>
