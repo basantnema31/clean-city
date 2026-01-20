@@ -1144,17 +1144,15 @@
 
         window.logout = () => {
             console.log("Logout triggered");
-            // alert("Debug: Logout Button Clicked! If you see this, the button works.");
-            if (confirm("Are you sure you want to logout?")) {
-                firebaseAuth.signOut(auth).then(() => {
-                    showToast("Logged Out Successfully", "success");
-                    localStorage.removeItem('user');
-                    location.reload();
-                }).catch((error) => {
-                    console.error("Logout error", error);
-                    showToast("Error: " + error.message, "error");
-                });
-            }
+            // confirm removed for debugging
+            firebaseAuth.signOut(auth).then(() => {
+                showToast("Logged Out Successfully", "success");
+                localStorage.removeItem('user');
+                location.reload();
+            }).catch((error) => {
+                console.error("Logout error", error);
+                showToast("Error: " + error.message, "error");
+            });
         }
 
         firebaseAuth.onAuthStateChanged(auth, (user) => {
