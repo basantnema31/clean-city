@@ -1154,7 +1154,7 @@
             loadUserData(user.email);
             loadLeaderboard();
 
-            // Check T&C
+
             setTimeout(() => {
                 if (window.checkTerms) window.checkTerms(user);
             }, 500);
@@ -2080,7 +2080,7 @@
             const touchY = e.touches[0].clientY;
             const touchDiff = touchY - touchStartY;
 
-            // Allow scroll inside modal
+
             if (e.target.closest('#terms-modal')) return;
 
             if (window.scrollY === 0 && touchDiff > 0) {
@@ -2221,7 +2221,7 @@
     </div>
 
     <script>
-        // T&C Logic
+
         window.checkTerms = function (user) {
             // Check logical flag in DB or LocalStorage
             const localAccepted = localStorage.getItem('terms_accepted_' + user.email);
