@@ -57,10 +57,155 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* Leaderboard Podium Styles */
+        .podium-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            margin-bottom: 30px;
+            gap: 15px;
+            padding-top: 20px;
+        }
+
+        .podium-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .podium-item:active {
+            transform: scale(0.95);
+        }
+
+        .podium-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid var(--glass-border);
+            object-fit: cover;
+            margin-bottom: 15px;
+            /* space for badge */
+            background: #fff;
+            box-shadow: var(--shadow);
+            z-index: 2;
+        }
+
+        .rank-1 {
+            order: 2;
+            transform: translateY(-15px);
+        }
+
+        .rank-2 {
+            order: 1;
+        }
+
+        .rank-3 {
+            order: 3;
+        }
+
+        .rank-1 .podium-avatar {
+            width: 90px;
+            height: 90px;
+            border-color: #FFD700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .rank-2 .podium-avatar {
+            border-color: #C0C0C0;
+            width: 70px;
+            height: 70px;
+        }
+
+        .rank-3 .podium-avatar {
+            border-color: #CD7F32;
+            width: 70px;
+            height: 70px;
+        }
+
+        .crown {
+            position: absolute;
+            top: -35px;
+            font-size: 2rem;
+            color: #FFD700;
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.2));
+            animation: float 2s ease-in-out infinite;
+            z-index: 3;
+        }
+
+        .podium-badge {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            bottom: 40px;
+            /* Adjust based on name position */
+            font-weight: 800;
+            font-size: 0.8rem;
+            color: #fff;
+            z-index: 3;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .rank-1 .podium-badge {
+            background: #FFD700;
+            bottom: 50px;
+            width: 32px;
+            height: 32px;
+            font-size: 1rem;
+        }
+
+        .rank-2 .podium-badge {
+            background: #C0C0C0;
+        }
+
+        .rank-3 .podium-badge {
+            background: #CD7F32;
+        }
+
+        .podium-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+            text-align: center;
+            max-width: 90px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-main);
+        }
+
+        .podium-score {
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 600;
+            background: rgba(79, 172, 254, 0.1);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
         html {
             height: 100%;
             overflow: hidden;
-            /* Disable global scroll */
+
         }
 
         .visually-hidden {
@@ -70,13 +215,13 @@
             overflow: hidden;
             clip: rect(1px, 1px, 1px, 1px);
             white-space: nowrap;
-            /* added line */
+
         }
 
         body {
             height: 100%;
             overflow: hidden;
-            /* Disable body scroll */
+
             display: flex;
             flex-direction: column;
             background-color: var(--bg-body);
@@ -85,18 +230,18 @@
             color: var(--text-main);
             font-family: 'Inter', sans-serif;
             padding-bottom: 0;
-            /* Removing body padding */
+
         }
 
         #app-container {
             display: none;
             flex: 1;
             overflow-y: auto;
-            /* Internal scroll */
+
             -webkit-overflow-scrolling: touch;
             width: 100%;
             padding-bottom: 120px;
-            /* Space for nav */
+
             overscroll-behavior-y: none;
         }
 
@@ -227,7 +372,7 @@
             background: transparent;
         }
 
-        /* #app-container style moved to main block for override */
+
 
         #app-header {
             padding: 20px;
@@ -381,7 +526,7 @@
             padding: 16px;
             position: fixed;
             z-index: 2147483647;
-            /* Max Z-Index for visibility */
+
             left: 50%;
             bottom: 30px;
             transform: translateX(-50%);
@@ -463,7 +608,7 @@
 <body>
     <div id="toast-container"></div>
 
-    <!-- Initial Loader -->
+
     <div id="initial-loader"
         style="position: fixed; inset: 0; background: var(--bg-body); z-index: 50000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s;">
         <div
@@ -655,13 +800,13 @@
         <div id="view-leaderboard" class="view-section">
             <h3 style="margin: 20px;">City Heroes</h3>
             <div id="leaderboard-list">
-                <!-- Dynamic Content -->
+
             </div>
         </div>
 
         <div id="view-report" class="view-section">
             <h3 style="margin: 20px;">Report Garbage</h3>
-            <!-- ... content ... -->
+
             <div class="glass">
                 <input type="file" id="file-cam" accept="image/*" class="visually-hidden"
                     onchange="handleFileSelect(this)">
@@ -724,7 +869,7 @@
             </div>
         </div>
 
-        <!-- SHARE MODAL -->
+
         <div id="share-modal"
             style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 50000; align-items: center; justify-content: center; flex-direction: column; padding: 20px;">
             <div
@@ -833,7 +978,7 @@
     </div>
     </div>
 
-    <!-- Custom Confirmation Modal -->
+
     <div class="modal-overlay" id="confirm-modal"
         style="z-index: 20000; display: none; position: fixed; inset: 0; height: 100dvh; justify-content: center; align-items: center; background: rgba(0,0,0,0.5);">
         <div class="glass modal"
@@ -868,8 +1013,8 @@
 
         window.onerror = function (message, source, lineno, colno, error) {
             console.error("Global Error Suppressed:", message, lineno);
-            // User Requested: Hide Frontend Errors
-            // if (window.showToast) showToast("Error: " + message, "error");
+
+
         };
 
         window.switchView = (viewName, navEl = null) => {
@@ -1098,16 +1243,16 @@
 
             firebaseAuth.signInWithEmailAndPassword(auth, email, pass)
                 .then((userCredential) => {
-                    // Signed in
+
                     const user = userCredential.user;
-                    // Fetch user data from Realtime Database
+
                     const userId = user.email.replace(/\./g, '_');
                     firebaseDb.get(firebaseDb.ref(db, 'users/' + userId)).then(snapshot => {
                         if (snapshot.exists()) {
                             loginSuccess(snapshot.val());
                         } else {
                             showToast("User data not found in DB. Please contact support.", "error");
-                            firebaseAuth.signOut(auth); // Log out if DB data is missing
+                            firebaseAuth.signOut(auth);
                         }
                     });
                 })
@@ -1136,22 +1281,22 @@
             firebaseAuth.createUserWithEmailAndPassword(auth, email, pass).then((userCredential) => {
                 const user = userCredential.user;
 
-                // Create User Profile in DB
+
                 const userId = email.replace(/\./g, '_');
                 firebaseDb.set(firebaseDb.ref(db, 'users/' + userId), {
                     name: name,
                     email: email,
-                    // password: pass, // In prod, do not save pass
+
                     points: 0,
                     reports: 0,
                     joined: Date.now()
                 }).then(() => {
                     showToast("Account Created! Success.", "success");
-                    loginSuccess({ name, email, points: 0, reports: 0, joined: Date.now() }); // Pass initial data
+                    loginSuccess({ name, email, points: 0, reports: 0, joined: Date.now() });
                 }).catch(err => {
                     console.error("DB Set Error:", err);
                     showToast("Error saving user data: " + err.message, "error");
-                    firebaseAuth.signOut(auth); // Log out if DB write fails
+                    firebaseAuth.signOut(auth);
                     btn.innerHTML = originalText;
                     btn.disabled = false;
                 });
@@ -1185,7 +1330,7 @@
             }, 500);
         }
 
-        /* Custom Confirmation Logic */
+
         let confirmCallback = null;
         window.showConfirm = (msg, callback) => {
             document.getElementById('confirm-msg').innerText = msg;
@@ -1214,7 +1359,7 @@
             });
         }
 
-        // Safety Timeout for Loader
+
         setTimeout(() => {
             const loader = document.getElementById('initial-loader');
             if (loader && loader.style.display !== 'none') {
@@ -1225,7 +1370,7 @@
         }, 3500);
 
         firebaseAuth.onAuthStateChanged(auth, (user) => {
-            // Hide Loader
+
             const loader = document.getElementById('initial-loader');
             if (loader) {
                 loader.style.opacity = '0';
@@ -1233,20 +1378,20 @@
             }
 
             if (user) {
-                // User is signed in
+
                 const userId = user.email.replace(/\./g, '_');
                 firebaseDb.get(firebaseDb.ref(db, 'users/' + userId)).then(snapshot => {
                     if (snapshot.exists()) {
                         loginSuccess(snapshot.val());
                     } else {
-                        // User authenticated with Firebase Auth but no data in Realtime DB
-                        // This might happen if user was created via Auth but DB write failed, or external creation
+
+
                         showToast("User data missing. Please contact support.", "error");
                         firebaseAuth.signOut(auth);
                     }
                 });
             } else {
-                // User is signed out
+
                 document.getElementById('auth-container').style.display = 'flex';
                 document.getElementById('app-container').style.display = 'none';
                 document.getElementById('app-header').style.display = 'none';
@@ -1254,13 +1399,13 @@
             }
         });
 
-        // The following block is now redundant because onAuthStateChanged handles initial state
-        // const savedUser = localStorage.getItem('user');
-        // if (savedUser) {
-        // loginSuccess(JSON.parse(savedUser));
-        // } else {
-        // document.getElementById('auth-container').style.display = 'flex';
-        // }
+
+
+
+
+
+
+
 
         window.showReportView = () => switchView('report');
 
@@ -1416,7 +1561,7 @@
                 }, 500);
 
             } else {
-                // Retry if model not loaded
+
                 aiRes.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading AI Model...';
                 aiRes.style.display = 'block';
                 setTimeout(() => window.runAIAnalysis(imgElement), 500);
@@ -1612,7 +1757,7 @@
             document.getElementById('submit-btn').disabled = false;
         }
 
-        // SOCIAL SHARE LOGIC
+
         window.generatedBlob = null;
 
         window.openShareModal = (imageSrc, lat, lng) => {
@@ -1620,8 +1765,8 @@
             const preview = document.getElementById('share-card-preview');
             const canvas = document.getElementById('share-canvas');
 
-            // OPTIMIZATION: Reduce resolution to prevent crashes on low-end phones
-            // 540x960 is sufficient for mobile screens (Half of 1080p)
+
+
             canvas.width = 540;
             canvas.height = 960;
 
@@ -1632,23 +1777,23 @@
             const img = new Image();
             img.crossOrigin = "Anonymous";
             img.onload = () => {
-                // Background
+
                 ctx.fillStyle = '#1a1a2e';
                 ctx.fillRect(0, 0, 540, 960);
 
-                // Featured Image (Center Crop)
-                // Draw coordinates scaled by 0.5
-                // Container: x=20, y=180, w=500, h=500, r=20
+
+
+
                 const aspect = img.width / img.height;
                 let drawWidth, drawHeight, offsetX, offsetY;
 
-                // Target Box: 500x500
-                if (aspect > 540 / 600) { // Wider
+
+                if (aspect > 540 / 600) {
                     drawHeight = 600;
                     drawWidth = 600 * aspect;
                     offsetX = (540 - drawWidth) / 2;
                     offsetY = 180;
-                } else { // Taller
+                } else {
                     drawWidth = 540;
                     drawHeight = 540 / aspect;
                     offsetX = 0;
@@ -1666,34 +1811,34 @@
                 ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
                 ctx.restore();
 
-                // Branding Top
+
                 ctx.fillStyle = '#4facfe';
-                ctx.font = 'bold 40px Poppins'; // 80 -> 40
+                ctx.font = 'bold 40px Poppins';
                 ctx.textAlign = 'center';
-                ctx.fillText("CleanCity Hero", 270, 100); // 540, 200 -> 270, 100
+                ctx.fillText("CleanCity Hero", 270, 100);
 
                 ctx.fillStyle = '#ffffff';
-                ctx.font = '20px Inter'; // 40 -> 20
+                ctx.font = '20px Inter';
                 ctx.fillText("I just reported a cleaning spot!", 270, 140);
 
-                // Bottom Info
-                ctx.fillStyle = '#ffffff';
-                ctx.font = '30px Poppins'; // 60 -> 30
-                ctx.fillText("Status: REPORTED ✅", 270, 750); // 1500 -> 750
 
-                ctx.font = '20px Inter'; // 40 -> 20
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '30px Poppins';
+                ctx.fillText("Status: REPORTED ✅", 270, 750);
+
+                ctx.font = '20px Inter';
                 ctx.fillStyle = '#aaaaaa';
                 const date = new Date().toLocaleDateString();
                 ctx.fillText(date + " • " + (window.currentPincode || "Rank " + (Math.floor(Math.random() * 20) + 1)), 270,
                     800);
 
-                // Logo/Footer
-                ctx.fillStyle = '#4facfe';
-                ctx.font = 'bold 25px Poppins'; // 50 -> 25
-                ctx.fillText("#CleanCityApp", 270, 900); // 1800 -> 900
 
-                // Export
-                const dataUrl = canvas.toDataURL('image/png', 0.8); // 80% quality
+                ctx.fillStyle = '#4facfe';
+                ctx.font = 'bold 25px Poppins';
+                ctx.fillText("#CleanCityApp", 270, 900);
+
+
+                const dataUrl = canvas.toDataURL('image/png', 0.8);
                 preview.src = dataUrl;
 
                 canvas.toBlob(blob => {
@@ -1709,9 +1854,9 @@
                 statusEl.innerText = "⏳ Generating Link... Please Wait.";
                 statusEl.style.color = "var(--primary)";
             }
-            // if (!window.generatedBlob) return showToast("Generating...", "error");
 
-            // Try Native Share
+
+
             if (navigator.share && navigator.canShare) {
                 try {
                     const file = new File([window.generatedBlob], "cleancity_share.png", { type: "image/png" });
@@ -1721,14 +1866,14 @@
                             title: 'CleanCity Hero',
                             text: 'Keeping my city clean! 🌿 #CleanCity'
                         });
-                        return; // Success
+                        return;
                     }
                 } catch (e) {
                     console.log("Native share failed", e);
                 }
             }
 
-            // Fallback: Show Download
+
             document.getElementById('download-btn').style.display = 'inline-block';
             showToast("Opening Download...", "info");
             window.downloadImage();
@@ -1751,11 +1896,11 @@
                     if (data.success) {
                         const url = data.data.url;
 
-                        // Update Modal Preview
+
                         const preview = document.getElementById('share-card-preview');
                         preview.src = url;
 
-                        // DISABLED: window.open(url, '_blank');
+
 
                         const statusEl = document.getElementById('share-status-msg');
                         if (statusEl) {
@@ -1768,12 +1913,12 @@
                             showToast("Image Ready! Long Press to Save.", "success");
                         }
 
-                        // Add explicit button in modal if not exists
-                        // Clean up previous buttons
+
+
                         const oldBtn = document.getElementById('manual-link-btn');
                         if (oldBtn) oldBtn.remove();
 
-                        // Manual Link Button REMOVED to prevent App Exit Loop
+
 
 
                     } else {
@@ -1797,7 +1942,7 @@
             }
             if (!currentLat || !currentLng) {
                 showToast("Location is MANDATORY. Please Enable GPS!", "error");
-                // Try to get location again
+
                 requestLocationValues();
                 return;
             }
@@ -1840,7 +1985,7 @@
 
                 showToast("Complaint Submitted Successfully!", "success");
 
-                // Trigger Share Modal
+
                 openShareModal(imageUrl, currentLat, currentLng);
 
                 resetReportForm();
@@ -1938,24 +2083,33 @@
 
                     html += `
             <div class="glass ${statusClass}"
-                style="padding: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; border-radius: 12px; box-shadow: var(--shadow);">
-                <div style="width: 50px; height: 50px; border-radius: 8px; overflow: hidden; flex-shrink: 0;">
-                    <img src="${c.image_url}" style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-                <div style="flex: 1;">
-                    <h4 style="margin: 0; font-size: 1rem;">${c.type}</h4>
-                    <small style="opacity: 0.8;">${date}</small>
-                </div>
-                <div style="text-align: right; display:flex; align-items:center; justify-content:flex-end; gap: 10px;">
-                    <div style="display: flex; flex-direction: column; align-items: flex-end;">
-                        <span style="font-weight: bold; font-size: 0.8rem; text-transform: uppercase;">
-                            ${c.status === 'resolved' ? 'Resolved' : (c.status === 'rejected' ? 'Rejected (Spam)' : c.status)}
-                        </span>
-                        ${c.status === 'resolved' ? '<small style="color:var(--success); font-size:0.7rem;">+10 Pts</small>' : ''}
+                style="padding: 15px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px; border-radius: 12px; box-shadow: var(--shadow);">
+                <div style="display: flex; align-items: center; gap: 15px; width: 100%;">
+                    <div style="width: 50px; height: 50px; border-radius: 8px; overflow: hidden; flex-shrink: 0;">
+                        <img src="${c.image_url}" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
-                    <div style="width:1px; height:20px; background:rgba(0,0,0,0.1); margin:0 5px;"></div>
-                    ${deleteBtn}
+                    <div style="flex: 1;">
+                        <h4 style="margin: 0; font-size: 1rem;">${c.type}</h4>
+                        <small style="opacity: 0.8;">${date}</small>
+                    </div>
+                    <div style="text-align: right; display:flex; align-items:center; justify-content:flex-end; gap: 10px;">
+                        <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                            <span style="font-weight: bold; font-size: 0.8rem; text-transform: uppercase;">
+                                ${c.status === 'resolved' ? 'Resolved' : (c.status === 'rejected' ? 'Rejected (Spam)' : c.status)}
+                            </span>
+                            ${c.status === 'resolved' ? '<small style="color:var(--success); font-size:0.7rem;">+10 Pts</small>' : ''}
+                        </div>
+                        <div style="width:1px; height:20px; background:rgba(0,0,0,0.1); margin:0 5px;"></div>
+                        ${deleteBtn}
+                    </div>
                 </div>
+                ${c.cleanup_image_url ? `
+                <div style="background: rgba(46, 204, 113, 0.1); border: 1px solid var(--success); border-radius: 8px; padding: 10px; width: 100%;">
+                    <small style="color: var(--success); font-weight: bold; display: block; margin-bottom: 5px;">
+                        <i class="fa-solid fa-check-circle"></i> Cleaned! See Proof:
+                    </small>
+                    <img src="${c.cleanup_image_url}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 6px;">
+                </div>` : ''}
             </div>
             `;
                 });
@@ -1963,12 +2117,27 @@
             });
         }
 
+        window.showConfirm = (msg, callback) => {
+            document.getElementById('confirm-msg').innerText = msg;
+            const yesBtn = document.getElementById('confirm-yes-btn');
+            yesBtn.onclick = () => {
+                callback();
+                closeConfirmModal();
+            };
+            document.getElementById('confirm-modal').style.display = 'flex';
+        }
+
+        window.closeConfirmModal = () => {
+            document.getElementById('confirm-modal').style.display = 'none';
+            document.getElementById('confirm-yes-btn').onclick = null;
+        }
+
         window.deleteComplaint = (id) => {
-            if (confirm("Are you sure you want to delete this report?")) {
+            showConfirm("Are you sure you want to delete this report?", () => {
                 firebaseDb.remove(firebaseDb.ref(db, 'complaints/' + id))
                     .then(() => showToast("Report deleted.", "success"))
                     .catch(err => showToast("Error: " + err.message, "error"));
-            }
+            });
         }
 
         function loadLeaderboard() {
@@ -1987,37 +2156,68 @@
                 let html = '';
                 const currentUserEmail = JSON.parse(localStorage.getItem('user') || '{}').email;
 
-                sortedUsers.forEach((u, i) => {
+                // 1. Podium Section (Top 3)
+                if (sortedUsers.length > 0) {
+                    html += `<div class="podium-container">`;
+
+                    // Helper to render podium item
+                    const renderPodiumItem = (user, rank) => {
+                        const isMe = user.email === currentUserEmail;
+                        const avatarUrl = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random&color=fff&size=128`;
+
+                        return `
+                        <div class="podium-item rank-${rank}">
+                            <div class="crown" ${rank === 1 ? '' : 'style="display:none"'}><i class="fa-solid fa-crown"></i></div>
+                            <img src="${avatarUrl}" class="podium-avatar" alt="${user.name}">
+                            <div class="podium-badge">${rank}</div>
+                            <div class="podium-name" style="${isMe ? 'color:var(--primary)' : ''}">
+                                ${user.name.split(' ')[0]} ${isMe ? '(You)' : ''}
+                            </div>
+                            <div class="podium-score">${user.points || 0} pts</div>
+                        </div>`;
+                    };
+
+                    // Order: 2nd (Left), 1st (Center), 3rd (Right)
+                    if (sortedUsers[1]) html += renderPodiumItem(sortedUsers[1], 2);
+                    if (sortedUsers[0]) html += renderPodiumItem(sortedUsers[0], 1);
+                    if (sortedUsers[2]) html += renderPodiumItem(sortedUsers[2], 3);
+
+                    html += `</div>`;
+                }
+
+                // 2. Remaining List (Rank 4+)
+                html += `<div style="display:flex; flex-direction:column; gap:8px;">`;
+                sortedUsers.slice(3).forEach((u, i) => {
                     const isMe = u.email === currentUserEmail;
-                    const rank = i + 1;
-                    let rankDisplay = `<span style="font-weight: bold; width: 30px; color: var(--text-light); text-align:center;">#${rank}</span>`;
-
-                    if (rank === 1) rankDisplay = '<i class="fa-solid fa-medal" style="width: 30px; text-align:center; color: #FFD700; font-size: 1.5rem;"></i>';
-                    if (rank === 2) rankDisplay = '<i class="fa-solid fa-medal" style="width: 30px; text-align:center; color: #C0C0C0; font-size: 1.5rem;"></i>';
-                    if (rank === 3) rankDisplay = '<i class="fa-solid fa-medal" style="width: 30px; text-align:center; color: #CD7F32; font-size: 1.5rem;"></i>';
-
-                    const highlightStyle = isMe ? 'background: rgba(67, 97, 238, 0.1); border: 2px solid var(--primary); border-radius: 8px;' : 'border-bottom: 1px solid #eee;';
+                    const rank = i + 4;
+                    // Improved styling for readability: specific background for "others" instead of generic opacity
+                    const highlightStyle = isMe
+                        ? 'background: rgba(67, 97, 238, 0.2); border: 2px solid var(--primary);'
+                        : 'background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border);';
 
                     html += `
-            <div style="display: flex; justify-content: space-between; padding: 12px; align-items: center; ${highlightStyle}">
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    ${rankDisplay}
-                    <div style="display:flex; flex-direction:column;">
-                        <span style="font-weight: 600; text-transform: capitalize;">${u.name || (u.email ? u.email.split('@')[0] : 'User')} ${isMe ? '(You)' : ''}</span>
-                        <small style="font-size: 0.75rem; color: var(--text-light);">${u.reports || 0} Reports</small>
+                    <div class="glass" style="display: flex; justify-content: space-between; padding: 12px 15px; align-items: center; border-radius: 12px; ${highlightStyle}">
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <span style="font-weight: bold; width: 25px; color: var(--text-light); text-align:center; font-family:'Poppins';">#${rank}</span>
+                             <img src="${u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=random&color=fff&size=64`}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;">
+                            <div style="display:flex; flex-direction:column;">
+                                <span style="font-weight: 600; font-size: 0.95rem; text-transform: capitalize; color: var(--text-main);">${u.name || 'User'} ${isMe ? '(You)' : ''}</span>
+                                <small style="font-size: 0.75rem; color: var(--text-light);">${u.reports || 0} Reports</small>
+                            </div>
+                        </div>
+                        <span style="font-weight: bold; color: var(--primary); font-size: 1rem; font-family:'Poppins';">${u.points || 0}</span>
                     </div>
-                </div>
-                <span style="font-weight: bold; color: var(--primary); font-size: 1.1rem;">${u.points || 0}</span>
-            </div>
-            `;
+                    `;
                 });
+                html += `</div>`;
+
                 container.innerHTML = html;
             });
         }
 
         function initMap() {
             if (document.getElementById('user-map') && !map) {
-                // Default to India (Generic) instead of specific location
+
                 map = L.map('user-map', { scrollWheelZoom: false }).setView([20.5937, 78.9629], 5);
                 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
@@ -2093,7 +2293,7 @@
         }
 
         window.requestLocationValues = () => {
-            // Request Camera Permission concurrently
+
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({ video: true })
                     .then(stream => {
@@ -2113,7 +2313,7 @@
                         currentLng = pos.coords.longitude;
                         if (locStat) locStat.innerHTML = `<span style="color:green"><i class="fa-solid fa-check"></i> Location Locked</span>`;
 
-                        // Fetch Pincode
+
                         fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLat}&lon=${currentLng}`)
                             .then(res => res.json())
                             .then(data => {
@@ -2130,7 +2330,7 @@
                         let msg = "Location Required!";
                         let btn = `<button onclick="requestLocationValues()" style="margin-left:5px; padding:2px 8px; font-size:0.8rem;">Retry</button>`;
 
-                        if (err.code === 1) { // Permission Denied
+                        if (err.code === 1) {
                             msg = "Permission Denied! Enable in Settings.";
                             btn = `<button onclick="alert('Please go to Phone Settings > Apps > CleanCity > Permissions > Location > Allow.')" style="margin-left:5px; padding:2px 8px; font-size:0.8rem; background:var(--danger); color:white;">Fix?</button> <button onclick="requestLocationValues()" style="margin-left:5px; padding:2px 8px; font-size:0.8rem;">Retry</button>`;
                         }
@@ -2149,7 +2349,7 @@
             }
         }
 
-        // T&C Logic (Merged)
+
         window.checkTerms = function (user) {
             const localAccepted = localStorage.getItem('terms_accepted_' + user.email);
             if (user.termsAccepted === true) {
@@ -2182,7 +2382,7 @@
 
     </script>
     <script>
-        // Aggressive Pull-to-Refresh Blocker
+
         let touchStartY = 0;
         document.addEventListener('touchstart', (e) => {
             touchStartY = e.touches[0].clientY;
@@ -2200,21 +2400,21 @@
             }
         }, { passive: false });
 
-        // Explicitly Request Camera Permission before opening Input
+
         window.triggerCameraWithPermission = async () => {
-            // 1. Try to get Permission via getUserMedia
+
             try {
                 showToast("Checking access...", "info");
-                // Use Environment camera preference
+
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
 
-                // If we get here, Permission is GRANTED
-                // Stop the stream immediately
+
+
                 stream.getTracks().forEach(track => track.stop());
 
-                // 2. Now Open Native Camera (Input click)
+
                 const input = document.getElementById('file-cam');
-                // Temporarily unhide to ensure click works? No, visually-hidden is fine usually.
+
                 input.click();
 
             } catch (err) {
@@ -2224,51 +2424,62 @@
                 } else {
                     alert("Camera Error: " + err.message + "\nTry settings manually.");
                 }
-                // Try fallback click anyway
+
                 document.getElementById('file-cam').click();
             }
         }
 
-        // Permission Onboarding Logic
+
         window.requestAllPermissions = async () => {
             showToast("Checking Permissions...", "info");
 
-            // 1. Camera
+
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                stream.getTracks().forEach(t => t.stop()); // Release
+                stream.getTracks().forEach(t => t.stop());
             } catch (e) {
                 console.warn("Camera denied", e);
             }
 
-            // 2. Location
+
             requestLocationValues();
 
-            // Done
+
             document.getElementById('permission-modal').style.display = 'none';
             localStorage.setItem('permissions_requested', 'true');
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Check if we need to show Modal
+
             const hasAsked = localStorage.getItem('permissions_requested');
 
-            // If first time, show modal after small delay
+
             if (!hasAsked) {
-                // Disabled by User Request
+
                 localStorage.setItem('permissions_requested', 'true');
-                // document.getElementById('permission-modal').style.display = 'flex';
+
             } else {
-                // Background check location anyway
+
                 requestLocationValues();
             }
         });
     </script>
 
+    <div id="confirm-modal" class="modal-overlay"
+        style="z-index: 20000; align-items: center; justify-content: center; display: none;">
+        <div class="glass modal" style="max-width: 400px; text-align: center;">
+            <i class="fa-solid fa-triangle-exclamation"
+                style="font-size: 3rem; color: var(--warning); margin-bottom: 20px;"></i>
+            <h3 style="margin-bottom: 15px; color: var(--text-main);">Confirm Action</h3>
+            <p id="confirm-msg" style="margin-bottom: 25px; color: var(--text-light);">Are you sure?</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button class="btn btn-outline" style="min-width: 100px;" onclick="closeConfirmModal()">Cancel</button>
+                <button class="btn btn-danger" id="confirm-yes-btn" style="min-width: 100px;">Yes, Proceed</button>
+            </div>
+        </div>
+    </div>
 
 
-
-    <!-- Terms & Conditions Modal -->
     <div id="terms-modal"
         style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 50000; align-items: center; justify-content: center;">
         <div
