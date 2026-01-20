@@ -1044,8 +1044,8 @@
         }
 
         window.handleLogin = () => {
-            const email = document.getElementById('login-email').value;
-            const pass = document.getElementById('login-pass').value;
+            const email = document.getElementById('login-email').value.trim();
+            const pass = document.getElementById('login-pass').value.trim();
             if (!email || !pass) return showToast("Please enter email & password", "error");
 
             const btn = document.querySelector('#login-card .btn');
@@ -1079,9 +1079,9 @@
         };
 
         window.handleSignup = () => {
-            const name = document.getElementById('reg-name').value;
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-pass').value;
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const pass = document.getElementById('reg-pass').value.trim();
 
             if (!name || !email || !pass) {
                 showToast("Please fill in all fields.", "error");
