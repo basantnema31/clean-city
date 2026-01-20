@@ -241,8 +241,8 @@
             -webkit-overflow-scrolling: touch;
             width: 100%;
             padding-bottom: 120px;
-
-            overscroll-behavior-y: none;
+            /* overscroll-behavior-y: none; Removed to fix stuck scroll on mobile */
+            overscroll-behavior-y: auto;
         }
 
         h1,
@@ -2186,7 +2186,7 @@
                 }
 
                 // 2. Remaining List (Rank 4+)
-                html += `<div style="display:flex; flex-direction:column; gap:8px;">`;
+                html += `<div style="display:flex; flex-direction:column; gap:5px;">`;
                 sortedUsers.slice(3).forEach((u, i) => {
                     const isMe = u.email === currentUserEmail;
                     const rank = i + 4;
@@ -2196,8 +2196,8 @@
                         : 'background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border);';
 
                     html += `
-                    <div class="glass" style="display: flex; justify-content: space-between; padding: 12px 15px; align-items: center; border-radius: 12px; ${highlightStyle}">
-                        <div style="display: flex; gap: 12px; align-items: center;">
+                    <div class="glass" style="display: flex; justify-content: space-between; padding: 10px 15px; align-items: center; border-radius: 12px; ${highlightStyle}">
+                        <div style="display: flex; gap: 10px; align-items: center;">
                             <span style="font-weight: bold; width: 25px; color: var(--text-light); text-align:center; font-family:'Poppins';">#${rank}</span>
                              <img src="${u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=random&color=fff&size=64`}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;">
                             <div style="display:flex; flex-direction:column;">
