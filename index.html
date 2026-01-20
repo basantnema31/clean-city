@@ -1911,7 +1911,7 @@
                 sortedUsers.forEach((u, i) => {
                     const isMe = u.email === currentUserEmail;
                     const rank = i + 1;
-                    let rankDisplay = `< span style = "font-weight: bold; width: 30px; color: var(--text-light); text-align:center;" > #${rank}</span > `;
+                    let rankDisplay = `<span style="font-weight: bold; width: 30px; color: var(--text-light); text-align:center;">#${rank}</span>`;
 
                     if (rank === 1) rankDisplay = '<i class="fa-solid fa-medal" style="width: 30px; text-align:center; color: #FFD700; font-size: 1.5rem;"></i>';
                     if (rank === 2) rankDisplay = '<i class="fa-solid fa-medal" style="width: 30px; text-align:center; color: #C0C0C0; font-size: 1.5rem;"></i>';
@@ -1920,7 +1920,7 @@
                     const highlightStyle = isMe ? 'background: rgba(67, 97, 238, 0.1); border: 2px solid var(--primary); border-radius: 8px;' : 'border-bottom: 1px solid #eee;';
 
                     html += `
-                < div style = "display: flex; justify-content: space-between; padding: 12px; align-items: center; ${highlightStyle}" >
+            <div style="display: flex; justify-content: space-between; padding: 12px; align-items: center; ${highlightStyle}">
                 <div style="display: flex; gap: 10px; align-items: center;">
                     ${rankDisplay}
                     <div style="display:flex; flex-direction:column;">
@@ -1929,8 +1929,8 @@
                     </div>
                 </div>
                 <span style="font-weight: bold; color: var(--primary); font-size: 1.1rem;">${u.points || 0}</span>
-            </div >
-                    `;
+            </div>
+            `;
                 });
                 container.innerHTML = html;
             });
@@ -1998,10 +1998,6 @@
         }
             }
 
-    </script>
-
-
-    <script>
         window.forceCamera = () => {
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({ video: true })
@@ -2075,7 +2071,7 @@
             }
         }
 
-        // T&C Logic (Inside Module)
+        // T&C Logic (Merged)
         window.checkTerms = function (user) {
             const localAccepted = localStorage.getItem('terms_accepted_' + user.email);
             if (user.termsAccepted === true) {
@@ -2104,6 +2100,9 @@
             }
         }
     </script>
+
+
+    // ... (Merged into main module)
 
 
     </script>
