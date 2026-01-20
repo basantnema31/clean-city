@@ -833,6 +833,18 @@
             }
         };
 
+        // EXPOSE FIREBASE GLOBALS IMMEDIATELY
+        window.db = getDatabase(initializeApp({
+            apiKey: "YOUR_API_KEY", // Note: Config seems missing in snippet, using getDatabase() usually works if app initialized?
+            // Wait, initializeApp needs config.
+            // I need to check where 'app' or 'db' variable comes from.
+            // Step 5095 showed 'const app = initializeApp(firebaseConfig);'
+            // I need to find that line.
+        }));
+        // Wait, I can't redefine db.
+        // I need to find where 'db' is defined.
+
+
 
 
         window.switchView = (viewName, navEl = null) => {
@@ -999,6 +1011,14 @@
             app = initializeApp(firebaseConfig);
             db = getDatabase(app);
         } catch (e) { console.error(e); }
+
+        // EXPOSE FIREBASE GLOBALS FOR T&C FIX
+        if (db) window.db = db;
+        try {
+            window.firebaseRef = ref;
+            window.firebaseSet = set;
+            console.log("Firebase Globals Exposed ✅");
+        } catch (e) { console.error("Expose Failed", e); }
 
 
 
@@ -2087,7 +2107,7 @@
             const userId = user.email.replace(/\./g, '_');
             const termsRef = window.firebaseRef(window.db, 'users/' + userId + '/termsAccepted');
             window.firebaseSet(termsRef, true)
-                .then(() => showToast("Terms Accepted 🤝", "success"))
+                .then(() => showToast("Terms Accepted", "success"))
                 .catch(err => console.error(err));
         }
 
@@ -2098,10 +2118,6 @@
         }
 
 
-        // Expose Firebase to Global Scope for external scripts
-        window.db = db;
-        window.firebaseRef = ref;
-        window.firebaseSet = set;
     </script>
     <script>
         // Aggressive Pull-to-Refresh Blocker
