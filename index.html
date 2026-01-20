@@ -2189,7 +2189,7 @@
 
                 // 2. Remaining List (Rank 4+)
                 // 2. Remaining List (Rank 4+)
-                html += `<div style="display:flex; flex-direction:column; gap:4px;">`;
+                html += `<div style="display:flex; flex-direction:column; gap:6px;">`;
                 sortedUsers.slice(3).forEach((u, i) => {
                     const isMe = u.email === currentUserEmail;
                     const rank = i + 4;
@@ -2199,16 +2199,16 @@
                         : 'background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border);';
 
                     html += `
-                    <div class="glass" style="display: flex; justify-content: space-between; padding: 6px 10px; margin: 0 !important; align-items: center; border-radius: 10px; ${highlightStyle}">
+                    <div class="glass" style="display: flex; justify-content: space-between; padding: 8px 12px; margin: 0 !important; align-items: center; border-radius: 12px; ${highlightStyle}">
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            <span style="font-weight: bold; width: 20px; color: var(--text-light); text-align:center; font-family:'Poppins'; font-size: 0.85rem;">#${rank}</span>
-                             <img src="${u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=random&color=fff&size=64`}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;">
+                            <span style="font-weight: bold; width: 22px; color: var(--text-light); text-align:center; font-family:'Poppins'; font-size: 0.9rem;">#${rank}</span>
+                             <img src="${u.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=random&color=fff&size=64`}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
                             <div style="display:flex; flex-direction:column;">
-                                <span style="font-weight: 600; font-size: 0.85rem; text-transform: capitalize; color: var(--text-main); line-height: 1.2;">${u.name || 'User'} ${isMe ? '(You)' : ''}</span>
-                                <small style="font-size: 0.65rem; color: var(--text-light); line-height: 1;">${u.reports || 0} Reports</small>
+                                <span style="font-weight: 600; font-size: 0.9rem; text-transform: capitalize; color: var(--text-main);">${u.name || 'User'} ${isMe ? '(You)' : ''}</span>
+                                <small style="font-size: 0.7rem; color: var(--text-light);">${u.reports || 0} Reports</small>
                             </div>
                         </div>
-                        <span style="font-weight: bold; color: var(--primary); font-size: 0.9rem; font-family:'Poppins';">${u.points || 0}</span>
+                        <span style="font-weight: bold; color: var(--primary); font-size: 0.95rem; font-family:'Poppins';">${u.points || 0}</span>
                     </div>
                     `;
                 });
