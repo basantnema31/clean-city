@@ -1398,7 +1398,6 @@
       };
 
       // Override logout with custom confirm
-      const originalLogout = window.logout;
       window.logout = () => {
         showConfirm("Are you sure you want to logout?", () => {
           localStorage.removeItem("adminAuth");
