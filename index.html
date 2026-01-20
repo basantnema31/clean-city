@@ -1811,8 +1811,7 @@
                     document.getElementById('user-points').innerText = data.points || 0;
                     document.getElementById('user-reports').innerText = data.reports || 0;
 
-                    if (document.getElementById('view-profile') && document.getElementById('view-profile').style.display ===
-                        'block') {
+                    if (document.getElementById('view-profile') && document.getElementById('view-profile').style.display === 'block') {
                         populateProfileView();
                     }
                 } else {
@@ -1855,16 +1854,8 @@
                 let html = '';
                 myComplaints.forEach(c => {
                     const date = new Date(c.timestamp).toLocaleDateString();
-
-
                     const statusClass = `status-${c.status || 'pending'}`;
-                    const statusIcon = c.status === 'resolved' ? 'fa-check-circle' : (c.status === 'rejected' ?
-                        'fa-times-circle' :
-                        'fa-clock');
-
-
-                    const deleteBtn = `<button class="delete-btn" onclick="deleteComplaint('${c.id}')" title="Delete Report"><i
-                    class="fa-solid fa-trash"></i></button>`;
+                    const deleteBtn = `<button class="delete-btn" onclick="deleteComplaint('${c.id}')" title="Delete Report"><i class="fa-solid fa-trash"></i></button>`;
 
                     html += `
             <div class="glass ${statusClass}"
@@ -1879,336 +1870,325 @@
                 <div style="text-align: right; display:flex; align-items:center; justify-content:flex-end; gap: 10px;">
                     <div style="display: flex; flex-direction: column; align-items: flex-end;">
                         <span style="font-weight: bold; font-size: 0.8rem; text-transform: uppercase;">
-                            ${c.status === 'resolved' ? 'Resolved' : (c.status === 'rejected' ? 'Rejected (Spam)' :
-                            c.status)}
+                            ${c.status === 'resolved' ? 'Resolved' : (c.status === 'rejected' ? 'Rejected (Spam)' : c.status)}
                         </span>
-                        ${c.status === 'resolved' ? '<small style="color:var(--success); font-size:0.7rem;">+10
-                            Pts</small > '
-                        : ''
-                }
-                    </div >
+                        ${c.status === 'resolved' ? '<small style="color:var(--success); font-size:0.7rem;">+10 Pts</small>' : ''}
+                    </div>
                     <div style="width:1px; height:20px; background:rgba(0,0,0,0.1); margin:0 5px;"></div>
-                    ${ deleteBtn }
-                </div >
-            </div >
-                    `;
+                    ${deleteBtn}
+                </div>
+            </div>
+            `;
+                });
+                activityList.innerHTML = html;
             });
-            activityList.innerHTML = html;
-            });
-            }
+        }
 
-            window.deleteComplaint = (id) => {
+        window.deleteComplaint = (id) => {
             if (confirm("Are you sure you want to delete this report?")) {
-            firebaseDb.remove(firebaseDb.ref(db, 'complaints/' + id))
-            .then(() => showToast("Report deleted.", "success"))
-            .catch(err => showToast("Error: " + err.message, "error"));
+                firebaseDb.remove(firebaseDb.ref(db, 'complaints/' + id))
+                    .then(() => showToast("Report deleted.", "success"))
+                    .catch(err => showToast("Error: " + err.message, "error"));
             }
-            }
+        }
 
-            function loadLeaderboard() {
+        function loadLeaderboard() {
             const container = document.getElementById('leaderboard-list');
             const usersRef = firebaseDb.ref(db, 'users');
 
             firebaseDb.onValue(usersRef, (snapshot) => {
-            const data = snapshot.val();
-            if (!data) {
-            container.innerHTML = '<div style="padding:10px; opacity:0.6">No users found</div>';
-            return;
-            }
+                const data = snapshot.val();
+                if (!data) {
+                    container.innerHTML = '<div style="padding:10px; opacity:0.6">No users found</div>';
+                    return;
+                }
 
-            const sortedUsers = Object.values(data).sort((a, b) => (b.points || 0) - (a.points || 0));
+                const sortedUsers = Object.values(data).sort((a, b) => (b.points || 0) - (a.points || 0));
 
-            let html = '';
-            const currentUserEmail = JSON.parse(localStorage.getItem('user') || '{}').email;
+                let html = '';
+                const currentUserEmail = JSON.parse(localStorage.getItem('user') || '{}').email;
 
-            sortedUsers.forEach((u, i) => {
-            const isMe = u.email === currentUserEmail;
-            const rank = i + 1;
-            let rankDisplay = `< span
-                style = "font-weight: bold; width: 30px; color: var(--text-light); text-align:center;" > #${ rank }</span > `;
+                sortedUsers.forEach((u, i) => {
+                    const isMe = u.email === currentUserEmail;
+                    const rank = i + 1;
+                    let rankDisplay = `< span style = "font-weight: bold; width: 30px; color: var(--text-light); text-align:center;" > #${rank}</span > `;
 
-            if (rank === 1) rankDisplay = '<i class="fa-solid fa-medal"
-                style="width: 30px; text-align:center; color: #FFD700; font-size: 1.5rem;"></i>';
-            if (rank === 2) rankDisplay = '<i class="fa-solid fa-medal"
-                style="width: 30px; text-align:center; color: #C0C0C0; font-size: 1.5rem;"></i>';
-            if (rank === 3) rankDisplay = '<i class="fa-solid fa-medal"
-                style="width: 30px; text-align:center; color: #CD7F32; font-size: 1.5rem;"></i>';
+                    if (rank === 1) rankDisplay = '<i class="fa-solid fa-medal" style="width: 30px; text-align:center; color: #FFD700; font-size: 1.5rem;"></i>';
+                    if (rank === 2) rankDisplay = '<i class="fa-solid fa-medal" style="width: 30px; text-align:center; color: #C0C0C0; font-size: 1.5rem;"></i>';
+                    if (rank === 3) rankDisplay = '<i class="fa-solid fa-medal" style="width: 30px; text-align:center; color: #CD7F32; font-size: 1.5rem;"></i>';
 
-            const highlightStyle = isMe ? 'background: rgba(67, 97, 238, 0.1); border: 2px solid var(--primary);
-            border-radius: 8px;' : 'border-bottom: 1px solid #eee;';
+                    const highlightStyle = isMe ? 'background: rgba(67, 97, 238, 0.1); border: 2px solid var(--primary); border-radius: 8px;' : 'border-bottom: 1px solid #eee;';
 
-            html += `
-                < div
-                style = "display: flex; justify-content: space-between; padding: 12px; align-items: center; ${highlightStyle}" >
+                    html += `
+                < div style = "display: flex; justify-content: space-between; padding: 12px; align-items: center; ${highlightStyle}" >
                 <div style="display: flex; gap: 10px; align-items: center;">
                     ${rankDisplay}
                     <div style="display:flex; flex-direction:column;">
-                        <span style="font-weight: 600; text-transform: capitalize;">${u.name || (u.email ?
-                            u.email.split('@')[0] : 'User')} ${isMe ? '(You)' : ''}</span>
+                        <span style="font-weight: 600; text-transform: capitalize;">${u.name || (u.email ? u.email.split('@')[0] : 'User')} ${isMe ? '(You)' : ''}</span>
                         <small style="font-size: 0.75rem; color: var(--text-light);">${u.reports || 0} Reports</small>
                     </div>
                 </div>
                 <span style="font-weight: bold; color: var(--primary); font-size: 1.1rem;">${u.points || 0}</span>
             </div >
                     `;
+                });
+                container.innerHTML = html;
             });
-            container.innerHTML = html;
-            });
-            }
+        }
 
-            function initMap() {
+        function initMap() {
             if (document.getElementById('user-map') && !map) {
-            // Default to India (Generic) instead of specific location
-            map = L.map('user-map', { scrollWheelZoom: false }).setView([20.5937, 78.9629], 5);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy;
-            <a href="https://carto.com/attributions">CARTO</a>'
+                // Default to India (Generic) instead of specific location
+                map = L.map('user-map', { scrollWheelZoom: false }).setView([20.5937, 78.9629], 5);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy;
+                        < a href="https://carto.com/attributions" > CARTO</a> '
             }).addTo(map);
 
             if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(pos => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
+                navigator.geolocation.getCurrentPosition(pos => {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
 
-            currentLat = lat;
-            currentLng = lng;
+                    currentLat = lat;
+                    currentLng = lng;
 
-            map.setView([lat, lng], 15);
+                    map.setView([lat, lng], 15);
 
-            L.circleMarker([lat, lng], {
-            radius: 10,
-            fillColor: '#4361ee',
-            color: '#fff',
-            weight: 3,
-            fillOpacity: 0.9
-            }).addTo(map).bindPopup("<b>You are here</b>").openPopup();
-            }, (err) => {
-            console.warn("GPS Error:", err);
-            showToast("Location access denied. Showing default view.", "info");
-            }, { enableHighAccuracy: true });
+                    L.circleMarker([lat, lng], {
+                        radius: 10,
+                        fillColor: '#4361ee',
+                        color: '#fff',
+                        weight: 3,
+                        fillOpacity: 0.9
+                    }).addTo(map).bindPopup("<b>You are here</b>").openPopup();
+                }, (err) => {
+                    console.warn("GPS Error:", err);
+                    showToast("Location access denied. Showing default view.", "info");
+                }, { enableHighAccuracy: true });
             }
 
             const complaintsRef = firebaseDb.ref(db, 'complaints');
             firebaseDb.onValue(complaintsRef, (snapshot) => {
-            const data = snapshot.val();
-            if (!data) return;
+                const data = snapshot.val();
+                if (!data) return;
 
-            const markers = [];
-            Object.values(data).forEach(val => {
-            if (val.lat && val.lng) {
-            const color = val.status === 'resolved' ? '#4cc9f0' : '#f8961e';
-            const marker = L.circleMarker([val.lat, val.lng], {
-            radius: 8,
-            fillColor: color,
-            color: '#fff',
-            weight: 2,
-            opacity: 1,
-            fillOpacity: 0.8
-            }).addTo(map);
-            marker.bindPopup(`< b > ${ val.type }</b > <br>${val.status}`);
-            markers.push(marker);
-            }
-            });
+                const markers = [];
+                Object.values(data).forEach(val => {
+                    if (val.lat && val.lng) {
+                        const color = val.status === 'resolved' ? '#4cc9f0' : '#f8961e';
+                        const marker = L.circleMarker([val.lat, val.lng], {
+                            radius: 8,
+                            fillColor: color,
+                            color: '#fff',
+                            weight: 2,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        }).addTo(map);
+                        marker.bindPopup(`< b > ${val.type}</b > <br>${val.status}`);
+                        markers.push(marker);
+                    }
+                });
 
-            if (markers.length > 0) {
-            const group = new L.featureGroup(markers);
-            map.fitBounds(group.getBounds().pad(0.1));
-            }
+                if (markers.length > 0) {
+                    const group = new L.featureGroup(markers);
+                    map.fitBounds(group.getBounds().pad(0.1));
+                }
             });
-            }
+        }
             }
 
     </script>
 
 
     <script>
-                window.forceCamera = () => {
-                    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    navigator.mediaDevices.getUserMedia({ video: true })
-                        .then(stream => {
-                            stream.getTracks().forEach(t => t.stop());
-                            document.getElementById('file-cam').click();
-                        })
-                        .catch(e => {
-                            alert("Permission/Error: " + e.message);
-                            document.getElementById('file-cam').click();
-                        });
-                    } else {
-                    document.getElementById('file-cam').click();
-                    }
-                }
+        window.forceCamera = () => {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(stream => {
+                        stream.getTracks().forEach(t => t.stop());
+                        document.getElementById('file-cam').click();
+                    })
+                    .catch(e => {
+                        alert("Permission/Error: " + e.message);
+                        document.getElementById('file-cam').click();
+                    });
+            } else {
+                document.getElementById('file-cam').click();
+            }
+        }
 
-                window.requestLocationValues = () => {
-                    // Request Camera Permission concurrently
-                    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    navigator.mediaDevices.getUserMedia({ video: true })
-                        .then(stream => {
-                            stream.getTracks().forEach(t => t.stop());
-                            console.log("Camera Permission Granted");
-                        })
-                        .catch(e => console.log("Camera Permission Denied", e));
-                    }
+        window.requestLocationValues = () => {
+            // Request Camera Permission concurrently
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(stream => {
+                        stream.getTracks().forEach(t => t.stop());
+                        console.log("Camera Permission Granted");
+                    })
+                    .catch(e => console.log("Camera Permission Denied", e));
+            }
 
-                const locStat = document.getElementById('loc-status');
-                if (locStat) locStat.innerHTML = `<span style="color:var(--text-light)"><i class="fa-solid fa-circle-notch fa-spin"></i> Detecting...</span>`;
+            const locStat = document.getElementById('loc-status');
+            if (locStat) locStat.innerHTML = `<span style="color:var(--text-light)"><i class="fa-solid fa-circle-notch fa-spin"></i> Detecting...</span>`;
 
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        (pos) => {
-                            currentLat = pos.coords.latitude;
-                            currentLng = pos.coords.longitude;
-                            if (locStat) locStat.innerHTML = `<span style="color:green"><i class="fa-solid fa-check"></i> Location Locked</span>`;
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        currentLat = pos.coords.latitude;
+                        currentLng = pos.coords.longitude;
+                        if (locStat) locStat.innerHTML = `<span style="color:green"><i class="fa-solid fa-check"></i> Location Locked</span>`;
 
-                            // Fetch Pincode
-                            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLat}&lon=${currentLng}`)
-                                .then(res => res.json())
-                                .then(data => {
-                                    if (data.address && data.address.postcode) {
-                                        window.currentPincode = data.address.postcode;
-                                        if (locStat) locStat.innerHTML += ` <small>(${window.currentPincode})</small>`;
-                                    }
-                                }).catch(e => console.log("Pincode fetch error", e));
-                        },
-                        (err) => {
-                            console.log("Auto-Loc Failed:", err);
-                            currentLat = null;
-                            currentLng = null;
-                            let msg = "Location Required!";
-                            let btn = `<button onclick="requestLocationValues()" style="margin-left:5px; padding:2px 8px; font-size:0.8rem;">Retry</button>`;
+                        // Fetch Pincode
+                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLat}&lon=${currentLng}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.address && data.address.postcode) {
+                                    window.currentPincode = data.address.postcode;
+                                    if (locStat) locStat.innerHTML += ` <small>(${window.currentPincode})</small>`;
+                                }
+                            }).catch(e => console.log("Pincode fetch error", e));
+                    },
+                    (err) => {
+                        console.log("Auto-Loc Failed:", err);
+                        currentLat = null;
+                        currentLng = null;
+                        let msg = "Location Required!";
+                        let btn = `<button onclick="requestLocationValues()" style="margin-left:5px; padding:2px 8px; font-size:0.8rem;">Retry</button>`;
 
-                            if (err.code === 1) { // Permission Denied
-                                msg = "Permission Denied! Enable in Settings.";
-                                btn = `<button onclick="alert('Please go to Phone Settings > Apps > CleanCity > Permissions > Location > Allow.')" style="margin-left:5px; padding:2px 8px; font-size:0.8rem; background:var(--danger); color:white;">Fix?</button> <button onclick="requestLocationValues()" style="margin-left:5px; padding:2px 8px; font-size:0.8rem;">Retry</button>`;
-                            }
+                        if (err.code === 1) { // Permission Denied
+                            msg = "Permission Denied! Enable in Settings.";
+                            btn = `<button onclick="alert('Please go to Phone Settings > Apps > CleanCity > Permissions > Location > Allow.')" style="margin-left:5px; padding:2px 8px; font-size:0.8rem; background:var(--danger); color:white;">Fix?</button> <button onclick="requestLocationValues()" style="margin-left:5px; padding:2px 8px; font-size:0.8rem;">Retry</button>`;
+                        }
 
-                            if (locStat) {
-                                locStat.innerHTML = `
+                        if (locStat) {
+                            locStat.innerHTML = `
                                 <span style="color:red; font-weight:bold; font-size: 0.8rem;"><i class="fa-solid fa-circle-exclamation"></i> ${msg}</span>
                                 ${btn}
                             `;
-                            }
-                        },
-                        { enableHighAccuracy: true, timeout: 10000 }
-                    );
-                    } else {
-                        if (locStat) locStat.innerHTML = "GPS Not Supported";
-                    }
-                }
+                        }
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            } else {
+                if (locStat) locStat.innerHTML = "GPS Not Supported";
+            }
+        }
 
-                // T&C Logic (Inside Module)
-                window.checkTerms = function (user) {
-                    const localAccepted = localStorage.getItem('terms_accepted_' + user.email);
-                if (user.termsAccepted === true) {
-                    localStorage.setItem('terms_accepted_' + user.email, 'true');
-                return;
-                    }
-                document.getElementById('terms-modal').style.display = 'flex';
-                }
-
-                window.acceptTerms = function () {
-                    const user = JSON.parse(localStorage.getItem('user'));
-                if (!user) return;
-                document.getElementById('terms-modal').style.display = 'none';
+        // T&C Logic (Inside Module)
+        window.checkTerms = function (user) {
+            const localAccepted = localStorage.getItem('terms_accepted_' + user.email);
+            if (user.termsAccepted === true) {
                 localStorage.setItem('terms_accepted_' + user.email, 'true');
+                return;
+            }
+            document.getElementById('terms-modal').style.display = 'flex';
+        }
 
-                const userId = user.email.replace(/\./g, '_');
-                const termsRef = firebaseDb.ref(db, 'users/' + userId + '/termsAccepted');
-                firebaseDb.set(termsRef, true)
-                        .then(() => showToast("Terms Accepted 🤝", "success"))
-                        .catch(err => console.error(err));
-                }
+        window.acceptTerms = function () {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) return;
+            document.getElementById('terms-modal').style.display = 'none';
+            localStorage.setItem('terms_accepted_' + user.email, 'true');
 
-                window.declineTerms = function () {
-                    if (confirm("If you decline, you cannot use the application. Are you sure?")) {
-                    logout();
-                    }
-                }
+            const userId = user.email.replace(/\./g, '_');
+            const termsRef = firebaseDb.ref(db, 'users/' + userId + '/termsAccepted');
+            firebaseDb.set(termsRef, true)
+                .then(() => showToast("Terms Accepted 🤝", "success"))
+                .catch(err => console.error(err));
+        }
+
+        window.declineTerms = function () {
+            if (confirm("If you decline, you cannot use the application. Are you sure?")) {
+                logout();
+            }
+        }
     </script>
 
 
     </script>
     <script>
-                // Aggressive Pull-to-Refresh Blocker
-                let touchStartY = 0;
-                document.addEventListener('touchstart', (e) => {
-                    touchStartY = e.touches[0].clientY;
-                }, {passive: false });
+        // Aggressive Pull-to-Refresh Blocker
+        let touchStartY = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        }, { passive: false });
 
-                document.addEventListener('touchmove', (e) => {
-                    const touchY = e.touches[0].clientY;
-                const touchDiff = touchY - touchStartY;
+        document.addEventListener('touchmove', (e) => {
+            const touchY = e.touches[0].clientY;
+            const touchDiff = touchY - touchStartY;
 
 
-                if (e.target.closest('#terms-modal')) return;
+            if (e.target.closest('#terms-modal')) return;
 
-                    if (window.scrollY === 0 && touchDiff > 0) {
-                    e.preventDefault();
-                    }
-                }, {passive: false });
+            if (window.scrollY === 0 && touchDiff > 0) {
+                e.preventDefault();
+            }
+        }, { passive: false });
 
-                // Explicitly Request Camera Permission before opening Input
-                window.triggerCameraWithPermission = async () => {
-                    // 1. Try to get Permission via getUserMedia
-                    try {
-                    showToast("Checking access...", "info");
+        // Explicitly Request Camera Permission before opening Input
+        window.triggerCameraWithPermission = async () => {
+            // 1. Try to get Permission via getUserMedia
+            try {
+                showToast("Checking access...", "info");
                 // Use Environment camera preference
-                const stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: "environment" } });
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
 
-                        // If we get here, Permission is GRANTED
-                        // Stop the stream immediately
-                        stream.getTracks().forEach(track => track.stop());
+                // If we get here, Permission is GRANTED
+                // Stop the stream immediately
+                stream.getTracks().forEach(track => track.stop());
 
                 // 2. Now Open Native Camera (Input click)
                 const input = document.getElementById('file-cam');
                 // Temporarily unhide to ensure click works? No, visually-hidden is fine usually.
                 input.click();
 
-                    } catch (err) {
-                    console.error("Camera Error:", err);
+            } catch (err) {
+                console.error("Camera Error:", err);
                 if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
                     alert("CAMERA PERMISSION DENIED! 🚫\n\n1. Go to Settings > Apps > CleanCity\n2. Tap Permissions\n3. Allow Camera\n\nThen try again!");
-                        } else {
+                } else {
                     alert("Camera Error: " + err.message + "\nTry settings manually.");
-                        }
+                }
                 // Try fallback click anyway
                 document.getElementById('file-cam').click();
-                    }
-                }
+            }
+        }
 
-                // Permission Onboarding Logic
-                window.requestAllPermissions = async () => {
-                    showToast("Checking Permissions...", "info");
+        // Permission Onboarding Logic
+        window.requestAllPermissions = async () => {
+            showToast("Checking Permissions...", "info");
 
-                // 1. Camera
-                try {
-                        const stream = await navigator.mediaDevices.getUserMedia({video: true });
-                        stream.getTracks().forEach(t => t.stop()); // Release
-                    } catch (e) {
-                    console.warn("Camera denied", e);
-                    }
+            // 1. Camera
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                stream.getTracks().forEach(t => t.stop()); // Release
+            } catch (e) {
+                console.warn("Camera denied", e);
+            }
 
-                // 2. Location
-                requestLocationValues();
+            // 2. Location
+            requestLocationValues();
 
-                // Done
-                document.getElementById('permission-modal').style.display = 'none';
+            // Done
+            document.getElementById('permission-modal').style.display = 'none';
+            localStorage.setItem('permissions_requested', 'true');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if we need to show Modal
+            const hasAsked = localStorage.getItem('permissions_requested');
+
+            // If first time, show modal after small delay
+            if (!hasAsked) {
+                // Disabled by User Request
                 localStorage.setItem('permissions_requested', 'true');
-                }
-
-                document.addEventListener('DOMContentLoaded', () => {
-                    // Check if we need to show Modal
-                    const hasAsked = localStorage.getItem('permissions_requested');
-
-                // If first time, show modal after small delay
-                if (!hasAsked) {
-                    // Disabled by User Request
-                    localStorage.setItem('permissions_requested', 'true');
-                        // document.getElementById('permission-modal').style.display = 'flex';
-                    } else {
-                    // Background check location anyway
-                    requestLocationValues();
-                    }
-                });
+                // document.getElementById('permission-modal').style.display = 'flex';
+            } else {
+                // Background check location anyway
+                requestLocationValues();
+            }
+        });
     </script>
 
 
