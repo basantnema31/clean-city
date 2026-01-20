@@ -820,13 +820,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@1.0.0"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue, remove, get, update } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-
-
-
-
-
-
+        import * as firebaseDb from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
         window.onerror = function (message, source, lineno, colno, error) {
             console.error(message, lineno);
@@ -834,11 +828,6 @@
                 showToast("Error: " + message, "error");
             }
         };
-
-
-
-
-
 
         window.switchView = (viewName, navEl = null) => {
             try {
@@ -1001,7 +990,7 @@
         let app, db;
         try {
             app = initializeApp(firebaseConfig);
-            db = getDatabase(app);
+            db = firebaseDb.getDatabase(app);
         } catch (e) { console.error(e); }
 
 
@@ -1739,9 +1728,9 @@
                 const wasteType = (resEl && resEl.dataset.val) ? resEl.dataset.val : "General Waste";
 
 
-                const complaintsRef = ref(db, 'complaints');
-                const newRef = push(complaintsRef);
-                await set(newRef, {
+                const complaintsRef = firebaseDb.ref(db, 'complaints');
+                const newRef = firebaseDb.push(complaintsRef);
+                await firebaseDb.set(newRef, {
                     image_url: imageUrl,
                     lat: currentLat || 0,
                     lng: currentLng || 0,
@@ -1796,9 +1785,9 @@
             if (!email) return;
 
             const userId = email.replace(/\./g, '_');
-            const userRef = ref(db, 'users/' + userId);
+            const userRef = firebaseDb.ref(db, 'users/' + userId);
 
-            onValue(userRef, (snapshot) => {
+            firebaseDb.onValue(userRef, (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     currentUserData = data;
@@ -1810,13 +1799,13 @@
                     }
                 } else {
                     const initData = { points: 0, reports: 0, email: email };
-                    set(userRef, initData);
+                    firebaseDb.set(userRef, initData);
                     currentUserData = initData;
                 }
             });
 
-            const complaintsRef = ref(db, 'complaints');
-            onValue(complaintsRef, (snapshot) => {
+            const complaintsRef = firebaseDb.ref(db, 'complaints');
+            firebaseDb.onValue(complaintsRef, (snapshot) => {
                 const data = snapshot.val();
                 if (!data) return;
 
@@ -1884,7 +1873,7 @@
 
         window.deleteComplaint = (id) => {
             if (confirm("Are you sure you want to delete this report?")) {
-                remove(ref(db, 'complaints/' + id))
+                firebaseDb.remove(firebaseDb.ref(db, 'complaints/' + id))
                     .then(() => showToast("Report deleted.", "success"))
                     .catch(err => showToast("Error: " + err.message, "error"));
             }
@@ -1892,9 +1881,9 @@
 
         function loadLeaderboard() {
             const container = document.getElementById('leaderboard-list');
-            const usersRef = ref(db, 'users');
+            const usersRef = firebaseDb.ref(db, 'users');
 
-            onValue(usersRef, (snapshot) => {
+            firebaseDb.onValue(usersRef, (snapshot) => {
                 const data = snapshot.val();
                 if (!data) {
                     container.innerHTML = '<div style="padding:10px; opacity:0.6">No users found</div>';
@@ -1965,8 +1954,8 @@
                     }, { enableHighAccuracy: true });
                 }
 
-                const complaintsRef = ref(db, 'complaints');
-                onValue(complaintsRef, (snapshot) => {
+                const complaintsRef = firebaseDb.ref(db, 'complaints');
+                firebaseDb.onValue(complaintsRef, (snapshot) => {
                     const data = snapshot.val();
                     if (!data) return;
 
@@ -2089,8 +2078,8 @@
             localStorage.setItem('terms_accepted_' + user.email, 'true');
 
             const userId = user.email.replace(/\./g, '_');
-            const termsRef = ref(db, 'users/' + userId + '/termsAccepted');
-            set(termsRef, true)
+            const termsRef = firebaseDb.ref(db, 'users/' + userId + '/termsAccepted');
+            firebaseDb.set(termsRef, true)
                 .then(() => showToast("Terms Accepted 🤝", "success"))
                 .catch(err => console.error(err));
         }
