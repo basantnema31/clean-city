@@ -1414,7 +1414,9 @@
         window.switchLens = () => {
             if (videoDevices.length < 2) { showToast("No other cameras found.", "info"); return; }
             currentDeviceIdx = (currentDeviceIdx + 1) % videoDevices.length; startCamera();
-        } window.closeCamera = () => {
+        };
+
+        window.closeCamera = () => {
             const modal = document.getElementById('camera-modal');
             modal.style.display = 'none';
             if (cameraStream) {
