@@ -2085,9 +2085,8 @@
             localStorage.setItem('terms_accepted_' + user.email, 'true');
 
             const userId = user.email.replace(/\./g, '_');
-            // Direct access to ref and set from module imports
-            const termsRef = ref(db, 'users/' + userId + '/termsAccepted');
-            set(termsRef, true)
+            const termsRef = window.firebaseRef(window.db, 'users/' + userId + '/termsAccepted');
+            window.firebaseSet(termsRef, true)
                 .then(() => showToast("Terms Accepted 🤝", "success"))
                 .catch(err => console.error(err));
         }
