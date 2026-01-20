@@ -2151,6 +2151,36 @@
                 requestLocationValues();
             }
         });
+
+        window.checkTerms = function (user) {
+            const localAccepted = localStorage.getItem('terms_accepted_' + user.email);
+
+            if (user.termsAccepted === true) {
+                localStorage.setItem('terms_accepted_' + user.email, 'true');
+                return;
+            }
+
+            document.getElementById('terms-modal').style.display = 'flex';
+        }
+
+        window.acceptTerms = function () {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) return;
+
+            document.getElementById('terms-modal').style.display = 'none';
+            localStorage.setItem('terms_accepted_' + user.email, 'true');
+
+            const userId = user.email.replace(/\./g, '_');
+            update(ref(db, 'users/' + userId), { termsAccepted: true })
+                .then(() => showToast("Terms Accepted 🤝", "success"))
+                .catch(err => console.error(err));
+        }
+
+        window.declineTerms = function () {
+            if (confirm("If you decline, you cannot use the application. Are you sure?")) {
+                logout();
+            }
+        }
     </script>
     <!-- Terms & Conditions Modal -->
     <div id="terms-modal"
@@ -2218,46 +2248,7 @@
         </div>
     </div>
 
-    <script>
 
-        window.checkTerms = function (user) {
-
-            const localAccepted = localStorage.getItem('terms_accepted_' + user.email);
-
-
-
-            if (user.termsAccepted === true) {
-                localStorage.setItem('terms_accepted_' + user.email, 'true');
-                return;
-            }
-
-
-            document.getElementById('terms-modal').style.display = 'flex';
-        }
-
-        window.acceptTerms = function () {
-            const user = JSON.parse(localStorage.getItem('user'));
-            if (!user) return;
-
-
-            document.getElementById('terms-modal').style.display = 'none';
-
-
-            localStorage.setItem('terms_accepted_' + user.email, 'true');
-
-
-            const userId = user.email.replace(/\./g, '_');
-            update(ref(db, 'users/' + userId), { termsAccepted: true })
-                .then(() => showToast("Terms Accepted 🤝", "success"))
-                .catch(err => console.error(err));
-        }
-
-        window.declineTerms = function () {
-            if (confirm("If you decline, you cannot use the application. Are you sure?")) {
-
-            }
-        }
-    </script>
 </body>
 
 </html>
