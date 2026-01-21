@@ -965,9 +965,10 @@
       document.getElementById("dashboard-container").style.display = "grid";
       setTimeout(() => {
         initMap();
-        // Silent re-login check (optional, but good for persistence)
-        handleSilentAuth();
-        listenToComplaints();
+        // Wait for Auth BEFORE listening to avoid Permission Denied
+        handleSilentAuth().then(() => {
+          listenToComplaints();
+        });
       }, 500);
     }
 
@@ -975,12 +976,14 @@
       try {
         await firebaseAuth.signInWithEmailAndPassword(auth, "judge@demo.com", "123456");
         console.log("Admin shadow-authenticated");
+        return true;
       } catch (e) {
         console.warn("Shadow auth failed", e);
         // Fallback: Create if not exists (for dev/first run reliability)
         if (e.code === 'auth/user-not-found') {
           try { await firebaseAuth.createUserWithEmailAndPassword(auth, "judge@demo.com", "123456"); } catch (e2) { }
         }
+        return false;
       }
     }
 
@@ -1081,6 +1084,9 @@
         renderDashboard();
         updateStats();
         updateMap();
+      }, (error) => {
+        console.error("READ ERROR:", error);
+        alert("Data Sync Error: " + error.message + "\n\nTry refreshing.");
       });
     }
     function renderDashboard() {
