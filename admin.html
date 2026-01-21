@@ -755,6 +755,10 @@
               <i class="fa-solid fa-moon"></i>
             </div>
             <div class="user-profile" style="display: flex; align-items: center; gap: 10px">
+              <button onclick="listenToComplaints()" class="btn"
+                style="padding: 5px 10px; font-size: 0.8rem; background: var(--secondary); color:#000;">
+                <i class="fa-solid fa-rotate-right"></i> Refresh
+              </button>
               <span class="admin-text">Admin</span>
               <div style="
                     width: 35px;
@@ -965,8 +969,13 @@
       document.getElementById("dashboard-container").style.display = "grid";
       setTimeout(() => {
         initMap();
-        // Wait for Auth BEFORE listening to avoid Permission Denied
-        handleSilentAuth().then(() => {
+
+        // Race: Wait for Auth OR 3 seconds max
+        const authPromise = handleSilentAuth();
+        const timeoutPromise = new Promise(resolve => setTimeout(resolve, 3000));
+
+        Promise.race([authPromise, timeoutPromise]).then(() => {
+          console.log("Proceeding to listen (Auth done or timed out)");
           listenToComplaints();
         });
       }, 500);
@@ -1075,7 +1084,22 @@
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
       }).addTo(map);
+
+      // LOAD CACHED DATA IMMEDIATELY
+      const cached = localStorage.getItem('cached_complaints');
+      if (cached) {
+        try {
+          currentComplaints = JSON.parse(cached);
+          renderDashboard();
+          updateStats();
+          console.log("Loaded cached data instantly.");
+          updateMap();
+        } catch (e) { }
+      }
     }
+
+    window.listenToComplaints = listenToComplaints;
+
     function listenToComplaints() {
       const complaintsRef = firebaseDb.ref(db, "complaints");
       showToast("Connecting to DB...", "info");
@@ -1090,6 +1114,8 @@
         if (count === 0) {
           showToast("Connected. No reports found.", "warning");
         } else {
+          // SAVE TO CACHE
+          localStorage.setItem('cached_complaints', JSON.stringify(currentComplaints));
           showToast(`Synced! Loaded ${count} reports.`, "success");
         }
 
