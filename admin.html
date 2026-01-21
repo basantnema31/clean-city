@@ -758,10 +758,7 @@
               <i class="fa-solid fa-moon"></i>
             </div>
             <div class="user-profile" style="display: flex; align-items: center; gap: 10px">
-              <button onclick="listenToComplaints()" class="btn"
-                style="padding: 5px 10px; font-size: 0.8rem; background: var(--secondary); color:#000;">
-                <i class="fa-solid fa-rotate-right"></i> Refresh
-              </button>
+
               <span class="admin-text">Admin</span>
               <div style="
                     width: 35px;
@@ -1160,7 +1157,10 @@
       const container = document.getElementById("complaints-list");
       container.innerHTML = "";
       const filter = document.getElementById("status-filter").value;
-      const list = Object.entries(currentComplaints).reverse();
+      // Explicitly sort by timestamp descending (Newest First)
+      const list = Object.entries(currentComplaints).sort(([, a], [, b]) => {
+        return new Date(b.timestamp || 0) - new Date(a.timestamp || 0);
+      });
       if (list.length === 0) {
         container.innerHTML =
           '<div style="text-align: center; padding: 20px;">No complaints found.</div>';
