@@ -1078,15 +1078,27 @@
     }
     function listenToComplaints() {
       const complaintsRef = firebaseDb.ref(db, "complaints");
+      showToast("Connecting to DB...", "info");
+
       firebaseDb.onValue(complaintsRef, (snapshot) => {
         const data = snapshot.val();
         currentComplaints = data || {};
+
+        const count = data ? Object.keys(data).length : 0;
+        console.log("Data Sync: ", count);
+
+        if (count === 0) {
+          showToast("Connected. No reports found.", "warning");
+        } else {
+          showToast(`Synced! Loaded ${count} reports.`, "success");
+        }
+
         renderDashboard();
         updateStats();
         updateMap();
       }, (error) => {
         console.error("READ ERROR:", error);
-        alert("Data Sync Error: " + error.message + "\n\nTry refreshing.");
+        alert("CRITICAL SYNC ERROR: " + error.message);
       });
     }
     function renderDashboard() {
