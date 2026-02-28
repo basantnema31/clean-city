@@ -49,8 +49,5 @@ You **must** run it through a local HTTP server.
    http://localhost:8080/index.html
    ```
 
-## 🔒 Firebase Security Rules Note
-Ensure your Firebase Realtime Database rules allow authenticated users to read and write to the `/users` and `/complaints` nodes. If rules are set to `false`, the app has graceful fallbacks to prevent crashing, but data will not be saved or loaded.
-
 ## 🤝 Contributing
 Contributions, issues, and feature requests are welcome! Let's build a greener future together. 🌱
