@@ -1244,8 +1244,14 @@
         try {
             app = initializeApp(firebaseConfig);
             db = firebaseDb.getDatabase(app);
-            auth = firebaseAuth.getAuth(app);
-        } catch (e) { console.error(e); }
+            // Fix for file:// protocol hanging IndexedDB
+            auth = firebaseAuth.initializeAuth(app, {
+                persistence: firebaseAuth.browserLocalPersistence
+            });
+        } catch (e) {
+            console.error("Auth Init Error:", e);
+            try { auth = firebaseAuth.getAuth(app); } catch (ex) { }
+        }
 
 
 
@@ -1308,9 +1314,14 @@
                         if (snapshot.exists()) {
                             loginSuccess(snapshot.val());
                         } else {
-                            showToast("User data not found in DB. Please contact support.", "error");
-                            firebaseAuth.signOut(auth);
+                            // Proceed with basic login info even if DB doesn't have it
+                            console.warn("User data not found in DB. Creating local session.");
+                            loginSuccess({ name: user.displayName || user.email.split('@')[0], email: user.email, points: 0, reports: 0, joined: Date.now() });
                         }
+                    }).catch(err => {
+                        console.error("DB Read Error:", err);
+                        // Fallback to basic auth info to prevent login blocking
+                        loginSuccess({ name: user.email.split('@')[0], email: user.email, points: 0, reports: 0, joined: Date.now() });
                     });
                 })
                 .catch((error) => {
@@ -1352,10 +1363,14 @@
                     loginSuccess({ name, email, points: 0, reports: 0, joined: Date.now() });
                 }).catch(err => {
                     console.error("DB Set Error:", err);
-                    showToast("Error saving user data: " + err.message, "error");
-                    firebaseAuth.signOut(auth);
+                    showToast("Database rules blocked profile save, but account was created! Logging in...", "info");
+
+                    // Reset button state
                     btn.innerHTML = originalText;
                     btn.disabled = false;
+
+                    // Important: Still log the user in locally even if DB set fails due to rules
+                    loginSuccess({ name, email, points: 0, reports: 0, joined: Date.now() });
                 });
             })
                 .catch((error) => {
@@ -1417,16 +1432,23 @@
         }
 
 
+        let authResolved = false;
         setTimeout(() => {
             const loader = document.getElementById('initial-loader');
             if (loader && loader.style.display !== 'none') {
                 console.warn("Forcing loader hide via timeout");
                 loader.style.opacity = '0';
-                setTimeout(() => loader.style.display = 'none', 500);
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    if (!authResolved) {
+                        document.getElementById('auth-container').style.display = 'flex';
+                    }
+                }, 500);
             }
         }, 3500);
 
         firebaseAuth.onAuthStateChanged(auth, (user) => {
+            authResolved = true;
 
             const loader = document.getElementById('initial-loader');
             if (loader) {
@@ -2103,9 +2125,14 @@
                     }
                 } else {
                     const initData = { points: 0, reports: 0, email: email };
-                    firebaseDb.set(userRef, initData);
+                    firebaseDb.set(userRef, initData).catch(err => console.error("DB Init Error:", err));
                     currentUserData = initData;
                 }
+            }, (error) => {
+                console.warn("User data read blocked by rules:", error);
+                currentUserData = { points: 0, reports: 0, email: email };
+                document.getElementById('user-points').innerText = "0";
+                document.getElementById('user-reports').innerText = "0";
             });
 
             const complaintsRef = firebaseDb.ref(db, 'complaints');
@@ -2177,6 +2204,16 @@
             `;
                 });
                 activityList.innerHTML = html;
+            }, (error) => {
+                console.warn("Complaints read blocked by rules:", error);
+                const activityList = document.getElementById('activity-list');
+                if (activityList) {
+                    activityList.innerHTML = `
+            <div class="glass" style="text-align: center; color: var(--text-light); padding: 40px;">
+                <i class="fa-solid fa-seedling" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
+                <p>Activity restricted by database rules.</p>
+            </div>`;
+                }
             });
         }
 
@@ -2276,6 +2313,14 @@
                 html += `</div>`;
 
                 container.innerHTML = html;
+            }, (error) => {
+                console.warn("Leaderboard blocked by rules:", error);
+                container.innerHTML = `
+                    <div style="padding:40px 20px; text-align:center; color:var(--text-light);">
+                        <i class="fa-solid fa-ranking-star" style="font-size:3rem; margin-bottom:20px; opacity:0.3"></i>
+                        <p>The leaderboard is currently restricted.</p>
+                        <small style="display:block; margin-top:10px; opacity:0.6">(Firebase Permission Denied)</small>
+                    </div>`;
             });
         }
 
